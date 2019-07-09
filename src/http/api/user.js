@@ -12,3 +12,7 @@ export const logoutAccount = () =>
 export const getUserMenu = () =>
     request({
     })
+
+export const createAccount = () =>
+    request({
+    })

@@ -8,11 +8,23 @@ export default {
     state: {
         userInfo: JSON.parse(sessionStorage.getItem("mm-juror-userinfo")) || { authType: "ADMIN", username: "admin", pw: "123456" },
         menu: JSON.parse(sessionStorage.getItem("mm-juror-menu")) || {
-            routers: [{
-                name: "hello",
-                componentPath: "hello",
-                path: "/hello"
-            }]
+            routers: [
+                {
+                    name: "home",
+                    componentPath: "home/",
+                    path: "home"
+                },
+                {
+                    name: "user-manage",
+                    componentPath: "user-manage/",
+                    path: "user-manage",
+                    parent: "home"
+                }, {
+                    name: "case-manage",
+                    componentPath: "case-manage/",
+                    path: "case-manage",
+                    parent: "home"
+                }]
         }
     },
     getters: {
@@ -104,29 +116,11 @@ export default {
          * @param {*} menu 用户菜单对象
          */
         setUserMenu(context, menu) {
-            const children = [],
-                newRouters = [
-                    {
-                        path: "/home",
-                        name: "home",
-                        component: () => import("@/page/home/index"),
-                        meta: {
-                            isAuth: true
-                        },
-                        children
-                    }
-                ];
+            const newRouters = [];
 
             menu.routers.forEach(o => {
-                if (o.level) {
-                    newRouters.push({
-                        path: "/" + o.path,
-                        name: o.name,
-                        component: () => import("@/views/" + o.componentPath + "index")
-                            .catch(() => Error404),
-                        meta: o.meta
-                    })
-                } else {
+                if (o.parent) {
+                    const children = newRouters[newRouters.length - 1].children;
                     children.push({
                         path: o.path,
                         name: o.name,
@@ -135,9 +129,19 @@ export default {
                             .catch(() => Error404),
                         meta: o.meta || {}
                     });
+                } else {
+                    newRouters.push({
+                        path: "/" + o.path,
+                        children: [],
+                        name: o.name,
+                        component: () => import("@/views/" + o.componentPath + "index")
+                            .catch(() => Error404),
+                        meta: o.meta
+                    })
                 }
             });
             newRouters.push({ path: "/*", redirect: "/home" });
+            console.log(newRouters);
             router.addRoutes(newRouters)
 
             context.commit("setUserMenu", menu);
