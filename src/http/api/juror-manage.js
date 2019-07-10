@@ -17,3 +17,19 @@ export const getJurors = data => {
         })
     })
 }
+
+export const getLowJurors = data => {
+    return new Promise(function (resolve, reject) {
+        resolve({
+            data: {
+                code: 1000,
+                msg: "获取成功",
+                total: 150,
+                data: [
+                    { id: 2002, name: "钱二", caseCount: 8 },
+                    { id: 2005, name: "孙六", caseCount: 0 }
+                ]
+            }
+        })
+    })
+}

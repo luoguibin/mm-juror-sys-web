@@ -1,5 +1,9 @@
 <template>
   <div class="juror-manage">
+    <div class="juror-manage_header">
+      <el-button @click="onOpenNewJuror()" type="primary">新增陪审员</el-button>
+    </div>
+
     <!-- 表格 -->
     <div class="juror-manage_main">
       <el-table :data="tableData" border v-loading="tableLoading">
@@ -11,7 +15,7 @@
         >
           <template slot-scope="scope">
             <template v-if="column.prop === 'caseCount'">
-              <el-button type="text">{{scope.row[column.prop]}}</el-button>
+              <el-button type="text" @click="onCaseCount(scope.row)">{{scope.row[column.prop]}}</el-button>
             </template>
             <template v-else>{{scope.row[column.prop]}}</template>
           </template>
@@ -20,7 +24,7 @@
         <!-- 操作按钮 -->
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button type="text" @click="onOpenDialog(scope.row)">详情</el-button>
+            <el-button type="text" @click="onOpenEidtDialog(scope.row)">编辑</el-button>
             <el-button
               type="text"
               v-if="scope.row.authType !== 'ADMIN'"
@@ -68,6 +72,11 @@ export default {
     this.getJurors();
   },
   methods: {
+    handlePageChange(page) {
+      this.currentPage = page;
+      this.getJurors();
+    },
+
     getJurors() {
       this.tableLoading = true;
       getJurors({ page: this.currentPage })
@@ -78,6 +87,22 @@ export default {
         .finally(() => {
           this.tableLoading = false;
         });
+    },
+
+    onCaseCount(data) {
+      this.$message("过阵子开放该功能");
+    },
+
+    onOpenEidtDialog(info) {
+      this.$message("过阵子开放该功能");
+    },
+
+    onDelete(info) {
+      this.$message("过阵子开放该功能");
+    },
+
+    onOpenNewJuror() {
+       this.$message("过阵子开放该功能");
     }
   }
 };

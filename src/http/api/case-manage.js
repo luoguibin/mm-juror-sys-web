@@ -54,3 +54,21 @@ export const getLawCases = data => {
         })
     })
 }
+
+export const getLawCase = data => {
+    return new Promise(function (resolve, reject) {
+        resolve({
+            data: {
+                code: 1000,
+                msg: "获取成功",
+                data: {
+                    id: 10001004,
+                    title: "案件标题4",
+                    content: "案件描述内容4...案件描述内容4....案件描述内容4...案件描述内容4...\n案件描述内容4...案件描述内容4...案件描述内容4",
+                    jurors: [],
+                    timeCreate: new Date().toJSON()
+                },
+            }
+        })
+    })
+}
