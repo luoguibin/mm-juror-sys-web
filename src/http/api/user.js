@@ -1,11 +1,27 @@
 import request from "../index";
 
-export const loginByAccount = data =>
-    request({
-        url: "/v1/user/login",
-        method: "post",
-        data
+export const loginByAccount = data => {
+    return new Promise(function (resolve, reject) {
+        resolve({
+            data: {
+                code: 1000,
+                data: {
+                    ...data,
+                    token: "helloworld",
+                    name: "liming",
+                    authType: data.id === 15688888888 ? "ADMIN" : "NORMAL"
+                },
+                msg: "登录成功"
+            }
+        })
     })
+
+    // return request({
+    //     url: "/v1/user/login",
+    //     method: "post",
+    //     data
+    // })
+}
 
 export const createAccount = data =>
     request({
@@ -85,9 +101,24 @@ export const getUserMenu = ({ authType }) => {
     })
 }
 
-export const getUserList = params =>
-    request({
-        url: "/v1/user/query-list",
-        method: "get",
-        params
+export const getUserList = params => {
+    return new Promise(function (resolve, reject) {
+        resolve({
+            data: {
+                data: [
+                    { id: 1, name: "name01", authType: "ADMIN", timeCreate: new Date().toJSON() },
+                    { id: 2, name: "name02", authType: "NORMAL", timeCreate: new Date().toJSON() },
+                    { id: 3, name: "name03", authType: "ADMIN", timeCreate: new Date().toJSON() }
+                ],
+                total: 300,
+                code: 1000,
+                msg: "获取成功"
+            }
+        })
     })
+    // return request({
+    //     url: "/v1/user/query-list",
+    //     method: "get",
+    //     params
+    // })
+}
