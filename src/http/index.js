@@ -26,7 +26,7 @@ axios.interceptors.request.use(
 
         if (token) {
             // config.headers["Authorization"] = token;
-            config.params.token = store.state.user.token;
+            config.params.token = store.state.user.userInfo.token;
         }
         if (config.methods === "post" && config.headers.serialize) {
             config.data = serialize(config.data);
@@ -43,6 +43,11 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
     res => {
         if (res.request.responseURL.includes(res.config.url)) {
+            if (res.data && res.data.code !== 1000) {
+                const message = res.data.msg || "请求失败";
+                Message.error({ message })
+                return Promise.reject(new Error(message));
+            }
             return res;
         } else {
             store.dispatch("logout");

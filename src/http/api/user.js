@@ -14,6 +14,23 @@ export const createAccount = data =>
         data
     })
 
+export const updateAccount = data =>
+    request({
+        url: "/v1/user/update",
+        method: "post",
+        data,
+        params: {
+            token: true
+        }
+    })
+
+export const deleteAccount = params =>
+    request({
+        url: "/v1/user/delete",
+        method: "delete",
+        params
+    })
+
 export const logoutAccount = () => {
     return new Promise(function (resolve, reject) {
         resolve({
@@ -67,3 +84,10 @@ export const getUserMenu = ({ authType }) => {
         resolve(menu);
     })
 }
+
+export const getUserList = params =>
+    request({
+        url: "/v1/user/query-list",
+        method: "get",
+        params
+    })

@@ -9,8 +9,8 @@
       </el-form-item>
 
       <!-- 输入框 -->
-      <el-form-item label="账 号" prop="uId">
-        <el-input v-model.number="account.uId" type="tel"></el-input>
+      <el-form-item label="账 号" prop="id">
+        <el-input v-model.number="account.id" type="tel"></el-input>
       </el-form-item>
       <el-form-item label="昵 称" prop="name" v-if="isSignUp">
         <el-input v-model.trim="account.name"></el-input>
@@ -66,13 +66,13 @@ export default {
       isSignUp: false,
       inRequest: false,
       account: {
-        uId: 15625045984,
+        id: 15625045984,
         name: "",
         pw: "123456",
         pw2: "123456"
       },
       formRules: {
-        uId: [
+        id: [
           { required: true, message: "请输入手机号码", trigger: "blur" },
           { validator: validateUId, trigger: "blur" }
         ],
@@ -118,7 +118,9 @@ export default {
               }
             }
 
-            this.getUserMenu();
+            if (info) {
+              this.getUserMenu();
+            }
           })
           .finally(() => {
             if (!this.isSignUp) {
