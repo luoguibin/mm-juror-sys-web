@@ -1,4 +1,4 @@
-import { loginByAccount, logoutAccount, getUserMenu } from "@/http/api/user";
+import { createAccount, loginByAccount, logoutAccount, getUserMenu } from "@/http/api/user";
 import router from "../../router";
 import Error404 from "@/page/error404";
 import { Message } from "element-ui";
@@ -6,26 +6,8 @@ import { Message } from "element-ui";
 export default {
     // namespaced: true,
     state: {
-        userInfo: JSON.parse(sessionStorage.getItem("mm-juror-userinfo")) || { authType: "ADMIN", username: "admin", pw: "123456" },
-        menu: JSON.parse(sessionStorage.getItem("mm-juror-menu")) || {
-            routers: [
-                {
-                    name: "home",
-                    componentPath: "home/",
-                    path: "home"
-                },
-                {
-                    name: "user-manage",
-                    componentPath: "user-manage/",
-                    path: "user-manage",
-                    parent: "home"
-                }, {
-                    name: "case-manage",
-                    componentPath: "case-manage/",
-                    path: "case-manage",
-                    parent: "home"
-                }]
-        }
+        userInfo: JSON.parse(sessionStorage.getItem("mm-juror-userinfo")),
+        menu: JSON.parse(sessionStorage.getItem("mm-juror-menu"))
     },
     getters: {
         authType: state => {
@@ -57,16 +39,22 @@ export default {
         }
     },
     actions: {
-        async loginByAccount(context, account) {
+        async loginByAccount(context, account, isSginUp) {
             try {
-                const { data } = await loginByAccount(account);
-                if (data.code === 200) {
-                    const { content: userInfo } = data;
+                let resp
+                if (isSginUp) {
+                    resp = await createAccount(account);
+                } else {
+                    resp = await loginByAccount(account);
+                }
+                const { data } = resp;
+                if (data.code === 1000) {
+                    const { data: userInfo } = data;
                     context.commit("setUserInfo", userInfo);
                     return userInfo;
                 } else {
                     Message.error({
-                        message: data.msg || "登录失败"
+                        message: data.msg || "操作失败"
                     });
                     return null;
                 }
@@ -77,7 +65,7 @@ export default {
 
         async getUserMenu(context) {
             try {
-                const { data: menu } = await getUserMenu({ authType: context.getters.authType });
+                const menu = await getUserMenu({ authType: context.getters.authType });
                 context.dispatch("setUserMenu", menu);
                 return menu;
             } catch (error) {
@@ -117,7 +105,6 @@ export default {
          */
         setUserMenu(context, menu) {
             const newRouters = [];
-
             menu.routers.forEach(o => {
                 if (o.parent) {
                     const children = newRouters[newRouters.length - 1].children;
@@ -141,7 +128,6 @@ export default {
                 }
             });
             newRouters.push({ path: "/*", redirect: "/home" });
-            console.log(newRouters);
             router.addRoutes(newRouters)
 
             context.commit("setUserMenu", menu);

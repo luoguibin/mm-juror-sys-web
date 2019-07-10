@@ -1,7 +1,7 @@
 import axios from "axios";
 import store from "../store";
+import Qs from "qs";
 import { baseUrl } from "@/config";
-
 import { Message } from "element-ui";
 
 axios.defaults.timeout = 10000;
@@ -18,6 +18,20 @@ axios.defaults.baseURL = baseUrl;
 //HTTPrequest拦截
 axios.interceptors.request.use(
     config => {
+        // if (config.data) {
+        //     config.data = Qs.stringify(config.data);
+        //     config.headers["Content-Type"] = "application/x-www-form-urlencoded";
+        // }
+        const token = (config.params || {}).token === true;
+
+        if (token) {
+            // config.headers["Authorization"] = token;
+            config.params.token = store.state.user.token;
+        }
+        if (config.methods === "post" && config.headers.serialize) {
+            config.data = serialize(config.data);
+            delete config.data.serialize;
+        }
         return config;
     },
     error => {
