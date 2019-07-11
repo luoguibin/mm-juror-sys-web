@@ -39,7 +39,6 @@ apiData.users.forEach((user, index) => {
         user.authType = "ADMIN";
     }
     user.jurorId = jurors[index].id;
-    user.address = Mock.mock('@county(true)');
 });
 
 apiData.userTotal = function () {
@@ -88,10 +87,34 @@ apiData.deleteUser = function (user) {
 // 处理陪审员列表
 jurors.forEach(juror => {
     juror.phone += Mock.mock('@integer(10000000, 99999999)');
+    juror.address = Mock.mock('@county(true)');
 });
 apiData.jurorTotal = function () {
     return this.jurors.length;
 };
+apiData.getLowJurors = function () {
+    const lowArray = [99999, 99999],
+        lowCount = lowArray.length;
+    this.jurors.forEach(juror => {
+        for (let i = 0; i < lowCount; i++) {
+            if (lowArray[i] > juror.caseCount) {
+                lowArray[i] = juror.caseCount;
+                break;
+            }
+        }
+    });
+
+    const min1 = lowArray[lowCount - 1];
+    let tempJurors = this.jurors.filter(juror => {
+        return juror.caseCount <= min1;
+    });
+
+    // tempJurors.sort(function (a, b) {
+    //     return a.timeCreate > b.timeCreate ? 1 : -1;
+    // });
+
+    return tempJurors.slice(0, 2);
+}
 
 
 // 处理案件列表
@@ -113,16 +136,62 @@ apiData.lawCases.forEach(lawCase => {
             } else {
                 index_ = index + Math.floor(Math.random() * (jurorLength - index));
             }
-            lawCase.jurors.push({
-                id: jurors[index_].id,
-                name: jurors[index_].name,
-            });
-            jurors[index_].caseCount++;
+            if (index !== index_) {
+                lawCase.jurors.push({
+                    id: jurors[index_].id,
+                    name: jurors[index_].name,
+                });
+                jurors[index_].caseCount++;
+            }
         }
     }
 })
 apiData.lawCaseTotal = function () {
     return this.lawCases.length;
 }
+apiData.getLawCase = function (params) {
+    if (params.id) {
+        return this.lawCases.find(o => {
+            return o.id === params.id;
+        });
+    }
+    else if (params.title) {
+        return this.lawCases.find(o => {
+            return o.title.includes(params.title);
+        })
+    } else {
+        return null
+    }
+}
+apiData.saveCaseJurors = function (params) {
+    if (!params.id || !params.jurors || !params.jurors.length) {
+        return false;
+    }
+    const lawCase = this.lawCases.find(o => {
+        return o.id === params.id;
+    });
+    if (!lawCase) {
+        return false;
+    }
 
+    const tempJurors = [];
+    params.jurors.forEach(o => {
+        const juror = this.jurors.find(o_ => {
+            return o_.id === o.id;
+        });
+        if (juror) {
+            tempJurors.push(juror);
+        }
+    })
+    const flag = tempJurors.length && tempJurors.length === params.jurors.length;
+    if (flag) {
+        lawCase.jurors = params.jurors;
+        lawCase.status += 1;
+        tempJurors.forEach(o => {
+            o.caseCount++;
+        });
+    }
+    return flag;
+}
+window.apiData = apiData;
 export default apiData;

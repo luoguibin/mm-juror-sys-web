@@ -17,6 +17,7 @@
             <template v-if="column.prop === 'caseCount'">
               <el-button type="text" @click="onCaseCount(scope.row)">{{scope.row[column.prop]}}</el-button>
             </template>
+             <template v-else-if="column.prop === 'timeCreate'">{{scope.row[column.prop] | timeFilter}}</template>
             <template v-else>{{scope.row[column.prop]}}</template>
           </template>
         </el-table-column>

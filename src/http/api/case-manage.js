@@ -1,73 +1,54 @@
-export const getLawCases = data => {
+import apiData from "./data";
+
+export const getLawCases = params => {
     return new Promise(function (resolve, reject) {
+        const page = params.page || 1;
+        const limit = params.limit || 10;
+        const start = (page - 1) * limit;
+
+        if (params.status === -1) {
+            resolve({
+                data: {
+                    code: 1000,
+                    msg: "获取成功",
+                    total: apiData.lawCaseTotal(),
+                    data: apiData.lawCases.slice(start, start + limit)
+                }
+            })
+        } else {
+            const tempDatas = apiData.lawCases.filter(o => o.status === params.status);
+            resolve({
+                data: {
+                    code: 1000,
+                    msg: "获取成功",
+                    total: tempDatas.length,
+                    data: tempDatas.slice(start, start + limit)
+                }
+            })
+        }
+    })
+}
+
+export const getLawCase = params => {
+    return new Promise(function (resolve, reject) {
+        const lawCase = apiData.getLawCase(params);
         resolve({
             data: {
-                code: 1000,
-                msg: "获取成功",
-                total: 200,
-                data: [
-                    {
-                        id: 10001001,
-                        title: "案件标题1",
-                        content: "案件描述内容1",
-                        jurors: [
-                            { id: 2001, name: "赵一" },
-                            { id: 2002, name: "钱二" },
-                        ],
-                        timeCreate: new Date().toJSON()
-                    },
-                    {
-                        id: 10001002,
-                        title: "案件标题2",
-                        content: "案件描述内容2",
-                        jurors: [
-                            { id: 2003, name: "张三" },
-                            { id: 2004, name: "李四" }
-                        ],
-                        timeCreate: new Date().toJSON()
-                    },
-                    {
-                        id: 10001003,
-                        title: "案件标题3",
-                        content: "案件描述内容3",
-                        jurors: [
-                            { id: 2005, name: "王五" }
-                        ],
-                        timeCreate: new Date().toJSON()
-                    },
-                    {
-                        id: 10001004,
-                        title: "案件标题4",
-                        content: "案件描述内容4",
-                        jurors: [],
-                        timeCreate: new Date().toJSON()
-                    },
-                    {
-                        id: 10001005,
-                        title: "案件标题5",
-                        content: "案件描述内容5",
-                        jurors: [],
-                        timeCreate: new Date().toJSON()
-                    }
-                ]
+                code: lawCase ? 1000 : 1001,
+                msg: lawCase ? "查询成功" : "未查询到对应数据",
+                data: lawCase
             }
         })
     })
 }
 
-export const getLawCase = data => {
+export const saveLawCaseJurors = params => {
     return new Promise(function (resolve, reject) {
+        const flag = apiData.saveCaseJurors(params);
         resolve({
             data: {
-                code: 1000,
-                msg: "获取成功",
-                data: {
-                    id: 10001004,
-                    title: "案件标题4",
-                    content: "案件描述内容4...案件描述内容4....案件描述内容4...案件描述内容4...\n案件描述内容4...案件描述内容4...案件描述内容4",
-                    jurors: [],
-                    timeCreate: new Date().toJSON()
-                },
+                code: flag ? 1000 : 1001,
+                msg: flag ? "保存成功" : "保存失败"
             }
         })
     })

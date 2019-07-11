@@ -1,18 +1,16 @@
-export const getJurors = data => {
+import apiData from "./data";
+
+export const getJurors = params => {
     return new Promise(function (resolve, reject) {
+        const page = params.page || 1;
+        const limit = params.limit || 10;
+        const start = (page - 1) * limit;
         resolve({
             data: {
                 code: 1000,
                 msg: "获取成功",
-                total: 150,
-                data: [
-                    { id: 2001, name: "赵一", phone: 15600000001, address: "广东茂名", caseCount: 10, timeCreate: new Date().toJSON() },
-                    { id: 2002, name: "钱二", phone: 15600000002, address: "广东茂名", caseCount: 8, timeCreate: new Date().toJSON() },
-                    { id: 2003, name: "张三", phone: 15600000003, address: "广东茂名", caseCount: 7, timeCreate: new Date().toJSON() },
-                    { id: 2004, name: "李四", phone: 15600000004, address: "广东茂名", caseCount: 11, timeCreate: new Date().toJSON() },
-                    { id: 2005, name: "王五", phone: 15600000005, address: "广东茂名", caseCount: 10, timeCreate: new Date().toJSON() },
-                    { id: 2005, name: "孙六", phone: 15600000006, address: "广东茂名", caseCount: 0, timeCreate: new Date().toJSON() }
-                ]
+                total: apiData.jurorTotal(),
+                data: apiData.jurors.slice(start, start + limit)
             }
         })
     })
@@ -20,15 +18,13 @@ export const getJurors = data => {
 
 export const getLowJurors = data => {
     return new Promise(function (resolve, reject) {
+        const result  = apiData.getLowJurors(),
+            flag = result.length;
         resolve({
             data: {
-                code: 1000,
-                msg: "获取成功",
-                total: 150,
-                data: [
-                    { id: 2002, name: "钱二", caseCount: 8 },
-                    { id: 2005, name: "孙六", caseCount: 0 }
-                ]
+                code: flag ? 1000 : 1001,
+                msg: flag ? "获取成功" : "获取失败",
+                data: result
             }
         })
     })
