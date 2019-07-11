@@ -39,10 +39,10 @@ export default {
         }
     },
     actions: {
-        async loginByAccount(context, account, isSginUp) {
+        async loginByAccount(context, account) {
             try {
-                let resp
-                if (isSginUp) {
+                let resp;
+                if (account.isSignUp) {
                     resp = await createAccount(account);
                 } else {
                     resp = await loginByAccount(account);

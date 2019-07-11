@@ -110,13 +110,24 @@ export default {
   },
   created() {
     window.randomPanel = this;
-    const lawCase = this.$route.params.lawCase;
-    if (lawCase) {
-      this.caseData = lawCase;
-      this.searchData.id = lawCase.id;
+    this.checkRoute();
+  },
+
+  watch: {
+    $route() {
+      this.checkRoute();
     }
   },
+  
   methods: {
+    checkRoute() {
+      const lawCase = this.$route.params.lawCase;
+      if (lawCase) {
+        this.caseData = lawCase;
+        this.searchData.id = lawCase.id;
+      }
+    },
+
     onSearch() {
       getLawCase(this.searchData).then(({ data }) => {
         this.caseData = data.data;

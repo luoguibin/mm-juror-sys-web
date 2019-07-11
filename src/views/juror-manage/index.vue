@@ -1,6 +1,14 @@
 <template>
   <div class="juror-manage">
     <div class="juror-manage_header">
+      <span>已陪审案件数排序&nbsp;</span>
+      <el-select v-model="orderType" @change="handleOrderTypeChange">
+        <el-option :value="-1" label="默认"></el-option>
+        <el-option :value="0" label="从多到少"></el-option>
+        <el-option :value="1" label="从少到多"></el-option>
+      </el-select>
+      <el-divider direction="vertical"></el-divider>
+
       <el-button @click="onOpenNewJuror()" type="primary">新增陪审员</el-button>
     </div>
 
@@ -17,7 +25,9 @@
             <template v-if="column.prop === 'caseCount'">
               <el-button type="text" @click="onCaseCount(scope.row)">{{scope.row[column.prop]}}</el-button>
             </template>
-             <template v-else-if="column.prop === 'timeCreate'">{{scope.row[column.prop] | timeFilter}}</template>
+            <template
+              v-else-if="column.prop === 'timeCreate'"
+            >{{scope.row[column.prop] | timeFilter}}</template>
             <template v-else>{{scope.row[column.prop]}}</template>
           </template>
         </el-table-column>
@@ -65,7 +75,9 @@ export default {
         { prop: "timeCreate", label: "创建时间" }
       ],
       tableTotal: 0,
-      currentPage: 1
+      currentPage: 1,
+
+      orderType: -1
     };
   },
   created() {
@@ -78,9 +90,13 @@ export default {
       this.getJurors();
     },
 
+    handleOrderTypeChange() {
+      this.getJurors();
+    },
+
     getJurors() {
       this.tableLoading = true;
-      getJurors({ page: this.currentPage })
+      getJurors({ page: this.currentPage, orderType: this.orderType })
         .then(({ data }) => {
           this.tableData = data.data;
           this.tableTotal = data.total;
@@ -103,7 +119,7 @@ export default {
     },
 
     onOpenNewJuror() {
-       this.$message("过阵子开放该功能");
+      this.$message("过阵子开放该功能");
     }
   }
 };

@@ -6,7 +6,6 @@ export const loginByAccount = data => {
         const user = apiData.users.find(o => {
             return o.id === data.id;
         })
-        console.log(user, data)
         if (user && user.pw === data.pw) {
             resolve({
                 data: {
@@ -38,11 +37,11 @@ export const loginByAccount = data => {
 
 export const createAccount = data => {
     return new Promise(function (resolve, reject) {
-        const flag = apiData.addUser(data)
+        const user = apiData.addUser(data)
         resolve({
             data: {
-                code: flag ? 1000 : 10001,
-                msg: flag ? "新增成功" : "新增失败"
+                code: user ? 1000 : 10001,
+                msg: user ? "新增成功" : "新增失败"
             }
         })
     })
@@ -72,7 +71,7 @@ export const updateAccount = data => {
     //     }
     // })
 }
-    
+
 
 export const deleteAccount = params => {
     return new Promise(function (resolve, reject) {

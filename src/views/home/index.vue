@@ -27,7 +27,9 @@
       <!-- 主视图 -->
       <el-main>
         <el-scrollbar>
-          <router-view></router-view>
+          <keep-alive>
+            <router-view></router-view>
+          </keep-alive>
         </el-scrollbar>
       </el-main>
     </el-container>

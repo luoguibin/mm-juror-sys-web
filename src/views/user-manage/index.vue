@@ -12,7 +12,12 @@
           :key="column.prop"
           :prop="column.prop"
           :label="column.label"
-        ></el-table-column>
+        >
+          <template slot-scope="scope">
+            <template v-if="column.prop === 'timeCreate'">{{scope.row[column.prop] | timeFilter}}</template>
+            <template v-else>{{scope.row[column.prop]}}</template>
+          </template>
+        </el-table-column>
 
         <!-- 操作按钮 -->
         <el-table-column label="操作">

@@ -32,7 +32,7 @@
             </template>
             <div
               v-else-if="column.prop === 'content'"
-              class="case-manage__content"
+              class="case-manage__content tooltip"
             >{{scope.row[column.prop]}}</div>
             <span
               v-else-if="column.prop === 'status'"

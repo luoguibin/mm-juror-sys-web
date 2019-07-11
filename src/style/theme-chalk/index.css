@@ -3679,6 +3679,7 @@
   position: absolute;
   background: #fff;
   min-width: 150px;
+  max-width: 500px;
   border: 1px solid #ebeef5;
   padding: 12px;
   z-index: 2000;

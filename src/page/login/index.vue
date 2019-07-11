@@ -12,13 +12,13 @@
       <el-form-item label="账 号" prop="id">
         <el-input v-model.number="account.id" type="tel"></el-input>
       </el-form-item>
-      <el-form-item label="昵 称" prop="name" v-if="isSignUp">
+      <el-form-item label="昵 称" prop="name" v-if="account.isSignUp">
         <el-input v-model.trim="account.name"></el-input>
       </el-form-item>
       <el-form-item label="密 码" prop="pw">
         <el-input v-model="account.pw" show-password clearable></el-input>
       </el-form-item>
-      <el-form-item label="重复密码" prop="pw2" v-if="isSignUp">
+      <el-form-item label="重复密码" prop="pw2" v-if="account.isSignUp">
         <el-input v-model="account.pw2" show-password clearable></el-input>
       </el-form-item>
 
@@ -28,10 +28,10 @@
           type="primary"
           @click.stop="onLoginCreate"
           :loading="inRequest"
-        >{{isSignUp ? "注册" : "登录"}}</el-button>
+        >{{account.isSignUp ? "注册" : "登录"}}</el-button>
         <el-switch
           style="float: right; margin-top: 20px;"
-          v-model="isSignUp"
+          v-model="account.isSignUp"
           @change="onSignUpChange"
           active-color="#13ce66"
           active-text="注册"
@@ -63,13 +63,13 @@ export default {
     };
 
     return {
-      isSignUp: false,
       inRequest: false,
       account: {
         id: 15610001000,
         name: "",
         pw: "123456",
-        pw2: "123456"
+        pw2: "123456",
+        isSignUp: false
       },
       formRules: {
         id: [
@@ -108,13 +108,13 @@ export default {
         }
 
         this.inRequest = true;
-        this.loginByAccount(this.account, this.isSignUp)
+        this.loginByAccount(this.account)
           .then(info => {
             this.inRequest = false;
             if (info) {
-              if (this.isSignUp) {
+              if (this.account.isSignUp) {
                 this.$message("注册成功");
-                this.isSignUp = false;
+                this.account.isSignUp = false;
               }
             }
 
@@ -123,7 +123,7 @@ export default {
             }
           })
           .finally(() => {
-            if (!this.isSignUp) {
+            if (!this.account.isSignUp) {
               let redirect = this.$route.query.redirect;
               if (redirect) {
                 redirect = encodeURI(redirect);

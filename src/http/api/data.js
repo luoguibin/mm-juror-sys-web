@@ -46,19 +46,19 @@ apiData.userTotal = function () {
 };
 
 apiData.addUser = function (user) {
-    if (!user.id) return false;
+    if (!user.id) return null;
 
     const target = this.users.find(o => {
         return o.id === user.id;
     });
     if (target) {
-        return false;
+        return null;
     }
     user.authType = "NORMAL";
     user.jurorId = 0;
     user.timeCreate = new Date().getTime();
     this.users.push(user);
-    return true;
+    return user;
 }
 
 apiData.updateUser = function (user) {
@@ -93,25 +93,11 @@ apiData.jurorTotal = function () {
     return this.jurors.length;
 };
 apiData.getLowJurors = function () {
-    const lowArray = [99999, 99999],
-        lowCount = lowArray.length;
-    this.jurors.forEach(juror => {
-        for (let i = 0; i < lowCount; i++) {
-            if (lowArray[i] > juror.caseCount) {
-                lowArray[i] = juror.caseCount;
-                break;
-            }
-        }
-    });
+    const tempJurors = this.jurors.filter(o => true);
 
-    const min1 = lowArray[lowCount - 1];
-    let tempJurors = this.jurors.filter(juror => {
-        return juror.caseCount <= min1;
+    tempJurors.sort(function (a, b) {
+        return a.caseCount > b.caseCount ? 1 : -1;
     });
-
-    // tempJurors.sort(function (a, b) {
-    //     return a.timeCreate > b.timeCreate ? 1 : -1;
-    // });
 
     return tempJurors.slice(0, 2);
 }
