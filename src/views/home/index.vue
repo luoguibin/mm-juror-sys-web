@@ -4,10 +4,10 @@
     <el-header class="home_header">
       <el-button type="text">{{userInfo ? userInfo.name : ''}}</el-button>
       <el-divider direction="vertical"></el-divider>
-      <el-button type="text" @click="logout">退出</el-button>
+      <el-button type="text" @click="onLogout">退出</el-button>
     </el-header>
 
-    <el-container>
+    <el-container style="overflow: hidden;">
       <!-- 左侧菜单 -->
       <el-aside :width="asideWidth" class="home_aside">
         <div class="aside_collapse">
@@ -26,7 +26,9 @@
 
       <!-- 主视图 -->
       <el-main>
-        <router-view></router-view>
+        <el-scrollbar>
+          <router-view></router-view>
+        </el-scrollbar>
       </el-main>
     </el-container>
   </el-container>
@@ -95,6 +97,17 @@ export default {
       }
     },
 
+    onLogout() {
+      this.$confirm("用户退出后所有数据将重置?", "系统提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消"
+      })
+        .then(() => {
+          this.logout();
+        })
+        .catch(() => {});
+    },
+
     ...mapActions(["logout"])
   }
 };
@@ -141,6 +154,14 @@ export default {
     .el-menu-item.is-active {
       background-color: rgba(0, 0, 0, 0.2);
       color: #409eff;
+    }
+  }
+
+  .el-scrollbar {
+    height: 100%;
+
+    .el-scrollbar__wrap {
+      overflow-x: hidden;
     }
   }
 }

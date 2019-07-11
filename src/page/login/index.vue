@@ -66,7 +66,7 @@ export default {
       isSignUp: false,
       inRequest: false,
       account: {
-        id: 15688888888,
+        id: 15610001000,
         name: "",
         pw: "123456",
         pw2: "123456"

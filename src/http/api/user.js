@@ -1,19 +1,32 @@
 import request from "../index";
+import apiData from "./data";
 
 export const loginByAccount = data => {
     return new Promise(function (resolve, reject) {
-        resolve({
-            data: {
-                code: 1000,
-                data: {
-                    ...data,
-                    token: "helloworld",
-                    name: "liming",
-                    authType: data.id === 15688888888 ? "ADMIN" : "NORMAL"
-                },
-                msg: "登录成功"
-            }
+        const user = apiData.users.find(o => {
+            return o.id === data.id;
         })
+        console.log(user, data)
+        if (user && user.pw === data.pw) {
+            resolve({
+                data: {
+                    code: 1000,
+                    data: {
+                        ...user,
+                        token: "helloworld" + new Date().getTime()
+                    },
+                    msg: "登录成功"
+                }
+            })
+        } else {
+            resolve({
+                data: {
+                    code: 1001,
+                    msg: "账号或密码错误"
+                }
+            })
+        }
+
     })
 
     // return request({
@@ -23,29 +36,60 @@ export const loginByAccount = data => {
     // })
 }
 
-export const createAccount = data =>
-    request({
-        url: "/v1/user/create",
-        method: "post",
-        data
+export const createAccount = data => {
+    return new Promise(function (resolve, reject) {
+        const flag = apiData.addUser(data)
+        resolve({
+            data: {
+                code: flag ? 1000 : 10001,
+                msg: flag ? "新增成功" : "新增失败"
+            }
+        })
     })
+    // request({
+    //     url: "/v1/user/create",
+    //     method: "post",
+    //     data
+    // })
+}
 
-export const updateAccount = data =>
-    request({
-        url: "/v1/user/update",
-        method: "post",
-        data,
-        params: {
-            token: true
-        }
+export const updateAccount = data => {
+    return new Promise(function (resolve, reject) {
+        const flag = apiData.updateUser(data)
+        resolve({
+            data: {
+                code: flag ? 1000 : 10001,
+                msg: flag ? "更新成功" : "更新失败"
+            }
+        })
     })
+    // request({
+    //     url: "/v1/user/update",
+    //     method: "post",
+    //     data,
+    //     params: {
+    //         token: true
+    //     }
+    // })
+}
+    
 
-export const deleteAccount = params =>
-    request({
-        url: "/v1/user/delete",
-        method: "delete",
-        params
+export const deleteAccount = params => {
+    return new Promise(function (resolve, reject) {
+        const flag = apiData.deleteUser(params)
+        resolve({
+            data: {
+                code: flag ? 1000 : 10001,
+                msg: flag ? "删除成功" : "删除失败"
+            }
+        })
     })
+    // request({
+    //     url: "/v1/user/delete",
+    //     method: "delete",
+    //     params
+    // })    
+}
 
 export const logoutAccount = () => {
     return new Promise(function (resolve, reject) {
@@ -103,14 +147,13 @@ export const getUserMenu = ({ authType }) => {
 
 export const getUserList = params => {
     return new Promise(function (resolve, reject) {
+        const page = params.page || 1;
+        const limit = params.limit || 10;
+        const start = (page - 1) * limit;
         resolve({
             data: {
-                data: [
-                    { id: 1, name: "name01", authType: "ADMIN", timeCreate: new Date().toJSON() },
-                    { id: 2, name: "name02", authType: "NORMAL", timeCreate: new Date().toJSON() },
-                    { id: 3, name: "name03", authType: "ADMIN", timeCreate: new Date().toJSON() }
-                ],
-                total: 300,
+                data: apiData.users.slice(start, start + limit),
+                total: apiData.userTotal(),
                 code: 1000,
                 msg: "获取成功"
             }
