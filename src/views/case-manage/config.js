@@ -8,7 +8,7 @@ export const CaseUtil = {
         const results = [],
             caseMap = this.caseProvinceMap;
         Object.keys(caseMap).forEach(key => {
-            results.push({ value: key, label: caseMap[key] })
+            results.push({ value: +key, label: caseMap[key] })
         });
         return results;
     },
@@ -24,7 +24,21 @@ export const CaseUtil = {
         const results = [],
             caseMap = this.caseTypeMap;
         Object.keys(caseMap).forEach(key => {
-            results.push({ value: key, label: caseMap[key] })
+            results.push({ value: +key, label: caseMap[key] })
+        });
+        return results;
+    },
+
+    departmentMap: {
+        1: "市案件管理部门",
+        2: "乡镇案件管理部门"
+    },
+
+    getDepartments() {
+        const results = [],
+            caseMap = this.departmentMap;
+        Object.keys(caseMap).forEach(key => {
+            results.push({ value: +key, label: caseMap[key] })
         });
         return results;
     },

@@ -11,7 +11,7 @@
     >
       <template slot="form-end">
         <el-divider direction="vertical"></el-divider>
-        <el-button @click="onOpenNewCase()" type="primary">新增案件</el-button>
+        <el-button @click="onOpenCaseDialog()" type="primary">新增案件</el-button>
       </template>
 
       <template #jurors="{data}">
@@ -26,7 +26,7 @@
       <!-- 操作按钮插槽 -->
       <template #table-option="{data}">
         <el-button type="text" v-if="data.status == 0" @click="onDistribute(data)">分配</el-button>
-        <el-button type="text" @click="onOpenEidtDialog(data)">编辑</el-button>
+        <el-button type="text" @click="onOpenCaseDialog(data)">编辑</el-button>
         <el-button type="text" v-if="authType >= 5" @click="onDelete(data)">删除</el-button>
       </template>
 
@@ -45,6 +45,16 @@
     <el-dialog :visible.sync="randomVisible" title="陪审员分配">
       <random-panel :lawCase="randomCase" @save="handleRandomSave"></random-panel>
     </el-dialog>
+
+    <!-- 新增案件对话框 -->
+    <el-dialog :visible.sync="caseVisible" :title="caseData.id ? '编辑案件' : '新增案件'">
+      <form-table
+        :formProps="caseProps"
+        :formData="caseData"
+        :inline="false"
+        @confirm="handleConfirmCase"
+      ></form-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -52,7 +62,7 @@
 import Vue from "vue";
 import { mapGetters } from "vuex";
 import FormTable from "../../components/form-table";
-import { getLawCases } from "../../http/api/case-manage";
+import { getLawCases, saveLawCase } from "../../http/api/case-manage";
 import { CaseUtil } from "./config";
 
 export default {
@@ -64,7 +74,13 @@ export default {
   data() {
     return {
       formProps: [
-        { prop: "id", label: "ID", target: "number", disabled: true, placeholder: "请输入ID" },
+        {
+          prop: "id",
+          label: "ID",
+          target: "number",
+          disabled: true,
+          placeholder: "请输入ID"
+        },
         {
           prop: "status",
           label: "案件状态",
@@ -90,7 +106,17 @@ export default {
             return CaseUtil.makeTitle(obj);
           }
         },
-        { prop: "department", label: "承办部门" },
+        {
+          prop: "department",
+          label: "承办部门",
+          changeText(obj, key) {
+            return CaseUtil.departmentMap[obj[key]];
+          }
+        },
+        {
+          prop: "undertaker",
+          label: "承办人"
+        },
         {
           prop: "status",
           label: "状态",
@@ -120,7 +146,35 @@ export default {
       currentPage: 1,
 
       randomVisible: false,
-      randomCase: null
+      randomCase: null,
+
+      caseVisible: false,
+      caseProps: [
+        { prop: "caseYear", label: "年份", width: "100px", target: "number" },
+        {
+          prop: "caseProvince",
+          label: "省份",
+          width: "100px",
+          target: "select",
+          options: CaseUtil.getCaseProvinces()
+        },
+        {
+          prop: "caseType",
+          label: "案件类型",
+          width: "100px",
+          target: "select",
+          options: CaseUtil.getCaseTypes()
+        },
+        { prop: "caseCode", label: "编号", width: "100px", target: "number" },
+        {
+          prop: "department",
+          label: "承办部门",
+          width: "100px",
+          target: "select",
+          options: CaseUtil.getDepartments()
+        }
+      ],
+      caseData: {}
     };
   },
 
@@ -141,6 +195,14 @@ export default {
 
     handleConfirm(data) {
       this.getLawCases();
+    },
+
+    handleConfirmCase(data) {
+      saveLawCase(data).then(({ data }) => {
+        this.$message(data.msg);
+        this.caseVisible = false;
+        this.getLawCases();
+      });
     },
 
     handleRandomSave() {
@@ -168,8 +230,15 @@ export default {
       this.randomCase = lawCase;
     },
 
-    onOpenEidtDialog(info) {
-      this.$message("过阵子开放该功能");
+    /**
+     * 新建或编辑案件
+     * @param {Object} data
+     */
+    onOpenCaseDialog(data) {
+      this.caseVisible = true;
+      this.caseData = data
+        ? JSON.parse(JSON.stringify(data))
+        : { caseYear: new Date().getFullYear() };
     },
 
     onDelete(info) {
@@ -178,10 +247,6 @@ export default {
 
     onOpenJuror(info) {
       console.log("onOpenJuror", info);
-      this.$message("过阵子开放该功能");
-    },
-
-    onOpenNewCase() {
       this.$message("过阵子开放该功能");
     }
   }

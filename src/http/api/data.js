@@ -29,7 +29,7 @@ const apiData = Mock.mock({
             "caseType|1": [1001, 1002, 1003, 1004],
             "caseCode": "@natural(100, 199)",
             "undertaker": "@cname",
-            "department|1": ["市案件管理部门", "乡镇案件管理部门"],
+            "department|1": [1, 2],
             "timeUpdate": new Date().getTime(),
             "status": 1,
             "jurors": [],
@@ -167,12 +167,12 @@ apiData.getLawCase = function (params) {
         return null
     }
 }
-apiData.saveCaseJurors = function (params) {
-    if (!params.id || !params.jurors || !params.jurors.length) {
+apiData.saveCaseJurors = function (data) {
+    if (!data.id || !data.jurors || !data.jurors.length) {
         return false;
     }
     const lawCase = this.lawCases.find(o => {
-        return o.id === params.id;
+        return o.id === data.id;
     });
     if (!lawCase) {
         return false;
@@ -197,5 +197,39 @@ apiData.saveCaseJurors = function (params) {
     }
     return flag;
 }
+apiData.saveLawCase = function (data) {
+    if (!data) {
+        return false;
+    }
+    if (data.id) {
+        // 保存
+        const lawCase = this.lawCases.find(o => o.id === data.id);
+        if (lawCase) {
+            for (const key in lawCase) {
+                if (lawCase.hasOwnProperty(key)) {
+                    lawCase[key] = data[key];
+                }
+            }
+        } else {
+            return false;
+        }
+    } else {
+        // 新增
+        const obj = JSON.parse(JSON.stringify(data));
+        obj.id = this.lawCases[this.lawCases.length - 1].id + 1;
+        obj.status = 1;
+
+        const index = Math.floor(Math.random() * this.users.length)
+        obj.undertaker = this.users[index].name;
+
+        const time = new Date().getTime();
+        obj.timeCreate = time;
+        obj.timeCreate = time;
+
+        this.lawCases.push(obj);
+    }
+    return true;
+}
+
 window.apiData = apiData;
 export default apiData;

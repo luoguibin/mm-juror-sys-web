@@ -53,3 +53,15 @@ export const saveLawCaseJurors = params => {
         })
     })
 }
+
+export const saveLawCase = data => {
+    return new Promise(function (resolve, reject) {
+        const flag = apiData.saveLawCase(data);
+        resolve({
+            data: {
+                code: flag ? 1000 : 1001,
+                msg: flag ? "保存成功" : "保存失败"
+            }
+        })
+    })
+}

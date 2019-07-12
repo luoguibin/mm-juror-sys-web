@@ -1,7 +1,7 @@
 <template>
   <div class="form-table">
     <!-- 头部搜索框 -->
-    <el-form class="form-table_search" :data="formData" :inline="true">
+    <el-form v-if="formData" class="form-table_search" :data="formData" :inline="inline">
       <!-- 常规选项 -->
       <el-form-item
         v-for="item in formProps"
@@ -49,14 +49,20 @@
       </el-form-item>
 
       <!-- 操作按钮 -->
-      <el-form-item>
+      <el-form-item :label-width="inline ? '' : '100px'">
         <el-button type="primary" @click="onConfirm">{{confirmText}}</el-button>
         <slot name="form-end"></slot>
       </el-form-item>
     </el-form>
 
     <!-- 表格数据 -->
-    <el-table class="form-table_main" :data="tableData" border v-loading="tableLoading">
+    <el-table
+      v-if="tableData"
+      class="form-table_main"
+      :data="tableData"
+      border
+      v-loading="tableLoading"
+    >
       <el-table-column
         v-for="item in tableColumns"
         :key="item.prop"
@@ -99,19 +105,23 @@ export default {
   props: {
     formProps: {
       type: Array,
-      default: []
+      default: function() {
+        return [];
+      }
     },
     formData: {
       type: Object,
-      default: {}
+      default: null
     },
     tableColumns: {
       type: Array,
-      default: []
+      default: function() {
+        return [];
+      }
     },
     tableData: {
       type: Array,
-      default: []
+      default: null
     },
     tableLoading: {
       type: Boolean,
@@ -120,6 +130,10 @@ export default {
     confirmText: {
       type: String,
       default: "确定"
+    },
+    inline: {
+      type: Boolean,
+      default: true
     }
   },
 
