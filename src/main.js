@@ -15,7 +15,7 @@ import "./mock";
 
 Vue.config.productionTip = false
 import moment from "moment";
-Vue.filter("timeFilter", function (value) {
+Vue.filter("time-filter", function (value) {
   if (typeof value === "number") {
     return moment(value).format("YYYY-MM-DD  HH:mm:ss");
   } else {

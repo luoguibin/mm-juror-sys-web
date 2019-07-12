@@ -14,7 +14,7 @@
           :label="column.label"
         >
           <template slot-scope="scope">
-            <template v-if="column.prop === 'timeCreate'">{{scope.row[column.prop] | timeFilter}}</template>
+            <template v-if="column.prop === 'timeCreate'">{{scope.row[column.prop] | time-filter}}</template>
             <template v-else>{{scope.row[column.prop]}}</template>
           </template>
         </el-table-column>

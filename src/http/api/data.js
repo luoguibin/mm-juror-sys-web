@@ -13,7 +13,9 @@ const apiData = Mock.mock({
         {
             "id|+1": 10001000,
             "name": "@cname",
+            "sex|1": [0, 1],
             "phone": 15600000001,
+            "company|1": ["茂名市单位", "茂名电白单位", "茂名高州单位", "茂名吴川单位"] ,
             "address": "",
             "caseCount": 0,
             "timeCreate": new Date().getTime()
@@ -22,14 +24,22 @@ const apiData = Mock.mock({
     "lawCases|1000": [
         {
             "id|+1": 20001000,
-            "title": "@ctitle(5, 20)",
-            "content": "@csentence(100, 500)",
+            "caseYear|1": [2018, 2019],
+            "caseProvince": 440000,
+            "caseType|1": [1001, 1002, 1003, 1004],
+            "caseCode": "@natural(100, 199)",
+            "undertaker": "@cname",
+            "department|1": ["市案件管理部门", "乡镇案件管理部门"],
+            "timeUpdate": new Date().getTime(),
             "status": 0,
             "jurors": [],
             "timeCreate": new Date().getTime()
         },
     ]
 })
+
+// @ctitle(5, 20)
+// @csentence(100, 500)
 
 const jurors = apiData.jurors;
 

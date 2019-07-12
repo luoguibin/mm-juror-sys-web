@@ -63,7 +63,7 @@
         <el-input
           v-else-if="column.prop === 'timeCreate'"
           readonly
-          :value="caseData[column.prop] | timeFilter"
+          :value="caseData[column.prop] | time-filter"
         ></el-input>
         <el-input v-else readonly v-model="caseData[column.prop]"></el-input>
       </el-form-item>

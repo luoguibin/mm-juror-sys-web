@@ -30,18 +30,11 @@
                 @click="onOpenJuror"
               >{{juror.name}}</el-button>
             </template>
-            <div
-              v-else-if="column.prop === 'content'"
-              class="case-manage__content tooltip"
-            >{{scope.row[column.prop]}}</div>
+
             <span
-              v-else-if="column.prop === 'status'"
-              :class="['case-manage_status', 'case-manage_status__' + scope.row[column.prop] ]"
-            >{{scope.row[column.prop] | statusFilter}}</span>
-            <template
-              v-else-if="column.prop === 'timeCreate'"
-            >{{scope.row[column.prop] | timeFilter}}</template>
-            <template v-else>{{scope.row[column.prop]}}</template>
+              v-else
+              :class="column.class ? column.class(scope.row, column.prop) : ''"
+            >{{ column.call ? column.call(scope.row, column.prop) : scope.row[column.prop]}}</span>
           </template>
         </el-table-column>
 
@@ -72,7 +65,9 @@
 </template>
 
 <script>
+import Vue from "vue";
 import { getLawCases } from "../../http/api/case-manage";
+import { CaseUtil } from "./config";
 
 export default {
   name: "case-manage",
@@ -82,34 +77,41 @@ export default {
       tableData: [],
       tableColumns: [
         { prop: "id", label: "ID" },
-        { prop: "title", label: "标题" },
-        { prop: "content", label: "描述" },
-        { prop: "status", label: "状态" },
+        {
+          prop: "title",
+          label: "案号",
+          call(target) {
+            return CaseUtil.makeTitle(target);
+          }
+        },
+        { prop: "department", label: "承办部门" },
+        {
+          prop: "status",
+          label: "状态",
+          class(target, key) {
+            return ["case-manage_status", "case-manage_status__" + target[key]];
+          },
+          call(target, key) {
+            return CaseUtil.makeStatus(target[key]);
+          }
+        },
         { prop: "jurors", label: "陪审员" },
-        { prop: "timeCreate", label: "创建时间" }
+        {
+          prop: "timeCreate",
+          label: "创建时间",
+          call(target, key) {
+            return Vue.filter("time-filter")(target[key]);
+          }
+        }
       ],
       tableTotal: 0,
-      currentStatus: -1,
+      currentStatus: 0,
       currentPage: 1
     };
   },
   created() {
     window.caseManage = this;
     this.getLawCases();
-  },
-  filters: {
-    statusFilter(value) {
-      switch (value) {
-        case 0:
-          return "可审办";
-        case 1:
-          return "已分配";
-        case 2:
-          return "已完结";
-        default:
-          return "其他";
-      }
-    }
   },
   methods: {
     handlePageChange(page) {
@@ -161,12 +163,6 @@ export default {
 
 <style lang="scss" scoped>
 .case-manage {
-  #{&}__content {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   #{&}_status {
     color: white;
     padding: 5px 8px;

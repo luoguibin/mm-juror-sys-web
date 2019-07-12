@@ -5,10 +5,10 @@
 </template>
 
 <script>
-import tooltip from "./mixins/tooltip";
+// import tooltip from "./mixins/tooltip";
 
 export default {
-  mixins: [tooltip]
+  // mixins: [tooltip]
 };
 </script>
 

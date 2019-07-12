@@ -26,9 +26,8 @@
               <el-button type="text" @click="onCaseCount(scope.row)">{{scope.row[column.prop]}}</el-button>
             </template>
             <template
-              v-else-if="column.prop === 'timeCreate'"
-            >{{scope.row[column.prop] | timeFilter}}</template>
-            <template v-else>{{scope.row[column.prop]}}</template>
+              v-else
+            >{{column.call ? column.call(scope.row, column.prop) : scope.row[column.prop]}}</template>
           </template>
         </el-table-column>
 
@@ -58,6 +57,7 @@
 </template>
 
 <script>
+import Vue from "vue";
 import { getJurors } from "../../http/api/juror-manage";
 
 export default {
@@ -69,15 +69,29 @@ export default {
       tableColumns: [
         { prop: "id", label: "ID" },
         { prop: "name", label: "姓名" },
+        {
+          prop: "sex",
+          label: "性别",
+          call(target, key) {
+            return target[key] ? "男" : "女";
+          }
+        },
+        { prop: "company", label: "工作单位" },
         { prop: "caseCount", label: "已陪审案件数" },
         { prop: "phone", label: "手机号码" },
         { prop: "address", label: "地址" },
-        { prop: "timeCreate", label: "创建时间" }
+        {
+          prop: "timeCreate",
+          label: "创建时间",
+          call(target, key) {
+            return Vue.filter("time-filter")(target[key]);
+          }
+        }
       ],
       tableTotal: 0,
       currentPage: 1,
 
-      orderType: -1
+      orderType: 1
     };
   },
   created() {
