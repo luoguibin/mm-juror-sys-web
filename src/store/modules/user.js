@@ -14,7 +14,7 @@ export default {
             if (state.userInfo) {
                 return state.userInfo.authType;
             } else {
-                return "";
+                return 0;
             }
         }
     },

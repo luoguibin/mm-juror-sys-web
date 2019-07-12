@@ -109,13 +109,6 @@ export const getUserMenu = ({ authType }) => {
                 path: "home"
             },
             {
-                name: "random-panel",
-                componentPath: "random-panel/",
-                title: "随机抽取",
-                path: "random-panel",
-                parent: "home"
-            },
-            {
                 name: "juror-manage",
                 componentPath: "juror-manage/",
                 title: "陪审员信息",
@@ -131,7 +124,7 @@ export const getUserMenu = ({ authType }) => {
             }]
     }
     return new Promise(function (resolve, reject) {
-        if (authType === "ADMIN") {
+        if (authType >= 5) {
             menu.routers.push({
                 name: "user-manage",
                 componentPath: "user-manage/",

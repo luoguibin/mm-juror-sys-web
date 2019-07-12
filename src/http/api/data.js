@@ -1,27 +1,27 @@
 import Mock from "mockjs";
 
 const apiData = Mock.mock({
-    "users|120-150": [{
+    "users|20-49": [{
         "id|+1": 15610001000,
         "pw": "123456",
         "name": "@cname",
-        "authType": "NORMAL",
+        "authType": 1,
         "jurorId": 0,
         "timeCreate": new Date().getTime()
     }],
-    "jurors|150": [
+    "jurors|50": [
         {
             "id|+1": 10001000,
             "name": "@cname",
             "sex|1": [0, 1],
             "phone": 15600000001,
-            "company|1": ["茂名市单位", "茂名电白单位", "茂名高州单位", "茂名吴川单位"] ,
+            "company|1": ["茂名市单位", "茂名电白单位", "茂名高州单位", "茂名吴川单位"],
             "address": "",
             "caseCount": 0,
             "timeCreate": new Date().getTime()
         },
     ],
-    "lawCases|1000": [
+    "lawCases|188": [
         {
             "id|+1": 20001000,
             "caseYear|1": [2018, 2019],
@@ -46,10 +46,18 @@ const jurors = apiData.jurors;
 // 处理用户列表
 apiData.users.forEach((user, index) => {
     if (Math.random() < 0.05 || index < 3) {
-        user.authType = "ADMIN";
+        user.authType = 5;
     }
     user.jurorId = jurors[index].id;
 });
+apiData.users.push({
+    id: 15688888888,
+    pw: "123456",
+    name: "super_admin",
+    authType: 9,
+    jurorId: 0,
+    timeCreate: new Date().getTime()
+})
 
 apiData.userTotal = function () {
     return this.users.length;
@@ -64,7 +72,7 @@ apiData.addUser = function (user) {
     if (target) {
         return null;
     }
-    user.authType = "NORMAL";
+    user.authType = 1;
     user.jurorId = 0;
     user.timeCreate = new Date().getTime();
     this.users.push(user);

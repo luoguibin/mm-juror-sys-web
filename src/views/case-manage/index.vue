@@ -43,11 +43,7 @@
           <template slot-scope="scope">
             <el-button type="text" v-if="scope.row.status == 0" @click="onDistribute(scope.row)">分配</el-button>
             <el-button type="text" @click="onOpenEidtDialog(scope.row)">编辑</el-button>
-            <el-button
-              type="text"
-              v-if="scope.row.authType !== 'ADMIN'"
-              @click="onDelete(scope.row)"
-            >删除</el-button>
+            <el-button type="text" v-if="authType >= 5" @click="onDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -61,16 +57,25 @@
         @current-change="handlePageChange"
       ></el-pagination>
     </div>
+
+    <!-- 陪审员分配对话框 -->
+    <el-dialog :visible.sync="randomVisible" title="陪审员分配">
+      <random-panel :lawCase="randomCase" @save="handleRandomSave"></random-panel>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import Vue from "vue";
+import { mapGetters } from "vuex";
 import { getLawCases } from "../../http/api/case-manage";
 import { CaseUtil } from "./config";
 
 export default {
   name: "case-manage",
+  components: {
+    "random-panel": () => import("../../components/random-panel/index")
+  },
   data() {
     return {
       tableLoading: false,
@@ -106,13 +111,22 @@ export default {
       ],
       tableTotal: 0,
       currentStatus: 0,
-      currentPage: 1
+      currentPage: 1,
+
+      randomVisible: false,
+      randomCase: null
     };
   },
+
   created() {
     window.caseManage = this;
     this.getLawCases();
   },
+
+  computed: {
+    ...mapGetters(["authType"])
+  },
+
   methods: {
     handlePageChange(page) {
       this.currentPage = page;
@@ -120,6 +134,12 @@ export default {
     },
 
     handleStatusChange(value) {
+      this.getLawCases();
+    },
+
+    handleRandomSave() {
+      this.randomVisible = false;
+      this.currentStatus = 1;
       this.getLawCases();
     },
 
@@ -136,10 +156,10 @@ export default {
     },
 
     onDistribute(info) {
-      this.$router.push({
-        name: "random-panel",
-        params: { lawCase: JSON.parse(JSON.stringify(info)) }
-      });
+      this.randomVisible = true;
+      const lawCase = JSON.parse(JSON.stringify(info));
+      lawCase.title = CaseUtil.makeTitle(lawCase);
+      this.randomCase = lawCase;
     },
 
     onOpenEidtDialog(info) {
@@ -180,3 +200,10 @@ export default {
 }
 </style>
 
+<style lang="scss">
+.case-manage {
+  .el-dialog {
+    min-width: 700px;
+  }
+}
+</style>

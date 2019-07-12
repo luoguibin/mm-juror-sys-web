@@ -35,11 +35,7 @@
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button type="text" @click="onOpenEidtDialog(scope.row)">编辑</el-button>
-            <el-button
-              type="text"
-              v-if="scope.row.authType !== 'ADMIN'"
-              @click="onDelete(scope.row)"
-            >删除</el-button>
+            <el-button type="text" v-if="authType >= 5" @click="onDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -58,6 +54,7 @@
 
 <script>
 import Vue from "vue";
+import { mapGetters } from "vuex";
 import { getJurors } from "../../http/api/juror-manage";
 
 export default {
@@ -94,10 +91,16 @@ export default {
       orderType: 1
     };
   },
+
   created() {
     window.JurorManage = this;
     this.getJurors();
   },
+
+  computed: {
+    ...mapGetters(["authType"])
+  },
+
   methods: {
     handlePageChange(page) {
       this.currentPage = page;
