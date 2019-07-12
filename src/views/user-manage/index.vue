@@ -1,8 +1,8 @@
 <template>
   <div class="user-manage">
     <form-table
-      :searchProps="searchProps"
-      :searchData="searchData"
+      :formProps="formProps"
+      :formData="formData"
       :tableColumns="tableColumns"
       :tableData="tableData"
       :tableLoading="tableLoading"
@@ -15,12 +15,10 @@
       </template>
 
       <!-- 操作按钮插槽 -->
-      <el-table-column slot="table-option" label="操作">
-        <template slot-scope="scope">
-          <el-button type="text" @click="onOpenDialog(scope.row)">详情</el-button>
-          <el-button type="text" v-if="authType >= 5" @click="onDelete(scope.row)">删除</el-button>
-        </template>
-      </el-table-column>
+      <template #table-option="{data}">
+        <el-button type="text" @click="onOpenDialog(data)">详情</el-button>
+        <el-button type="text" v-if="authType >= 5" @click="onDelete(data)">删除</el-button>
+      </template>
 
       <el-pagination
         slot="pagination"
@@ -82,7 +80,7 @@ export default {
   },
   data() {
     return {
-      searchProps: [
+      formProps: [
         {
           prop: "id",
           label: "ID",
@@ -90,7 +88,7 @@ export default {
           placeholder: "请输入ID",
           disabled: true
         },
-        { prop: "name", label: "名称", placeholder: "请输入名称..." },
+        { prop: "name", label: "名称", disabled: true, placeholder: "请输入名称..." },
         {
           prop: "authType",
           label: "账号类型",
@@ -102,7 +100,7 @@ export default {
           ]
         }
       ],
-      searchData: {},
+      formData: {},
       tableColumns: [
         { prop: "id", label: "ID" },
         { prop: "name", label: "名称", width: "100px" },
@@ -110,10 +108,11 @@ export default {
         {
           prop: "timeCreate",
           label: "创建时间",
-          call(target, key) {
-            return Vue.filter("time-filter")(target[key]);
+          changeText(obj, key) {
+            return Vue.filter("time-filter")(obj[key]);
           }
-        }
+        },
+        { prop: "table-option", label: "操作", slot: "table-option" }
       ],
       tableData: [],
       tableLoading: false,
@@ -140,7 +139,7 @@ export default {
   methods: {
     getUserList() {
       this.tableLoading = true;
-      getUserList({ token: true, page: this.currentPage })
+      getUserList({ token: true, page: this.currentPage, ...this.formData })
         .then(({ data }) => {
           this.tableData = data.data;
           this.tableTotal = data.total;
@@ -152,6 +151,7 @@ export default {
 
     handleConfirm(data) {
       console.log("handleConfirm", data);
+      this.$message("过阵子开放改功能");
     },
 
     handlePageChange(page) {

@@ -31,7 +31,7 @@ const apiData = Mock.mock({
             "undertaker": "@cname",
             "department|1": ["市案件管理部门", "乡镇案件管理部门"],
             "timeUpdate": new Date().getTime(),
-            "status": 0,
+            "status": 1,
             "jurors": [],
             "timeCreate": new Date().getTime()
         },
@@ -124,13 +124,13 @@ apiData.getLowJurors = function () {
 // 处理案件列表
 const jurorLength = jurors.length;
 apiData.lawCases.forEach(lawCase => {
-    if (Math.random() < 0.8) {
+    if (Math.random() < 0.5) {
         const index = Math.floor(Math.random() * jurorLength);
         lawCase.jurors.push({
             id: jurors[index].id,
             name: jurors[index].name,
         })
-        lawCase.status = Math.random() < 0.8 ? 2 : 1;
+        lawCase.status = Math.random() < 0.8 ? 3 : 2;
         jurors[index].caseCount++;
 
         if (Math.random() < 0.95) {

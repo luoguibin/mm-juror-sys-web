@@ -1,10 +1,10 @@
 <template>
   <div class="form-table">
     <!-- 头部搜索框 -->
-    <el-form class="form-table_search" :data="searchData" :inline="true">
+    <el-form class="form-table_search" :data="formData" :inline="true">
       <!-- 常规选项 -->
       <el-form-item
-        v-for="item in searchProps"
+        v-for="item in formProps"
         :key="item.prop"
         :prop="item.prop"
         :label="item.label"
@@ -13,9 +13,10 @@
         <!-- 下拉选择 -->
         <el-select
           v-if="item.target === 'select'"
-          v-model="searchData[item.prop]"
+          v-model="formData[item.prop]"
           :placeholder="item.placeholder"
           :disabled="item.disabled"
+          @change="onFormDataChange(item)"
         >
           <el-option
             v-for="option in item.options"
@@ -28,20 +29,20 @@
         <!-- 数字输入框 -->
         <el-input
           v-else-if="item.target === 'number'"
-          v-model.number="searchData[item.prop]"
+          v-model.number="formData[item.prop]"
           :disabled="item.disabled"
           :placeholder="item.placeholder"
         ></el-input>
 
-        <slot v-else-if="item.slot" :name="item.slot"></slot>
-
         <!-- span文本显示 -->
-        <span v-else-if="item.target === 'span'">{{searchData[item.prop]}}</span>
+        <span v-else-if="item.target === 'span'">{{formData[item.prop]}}</span>
+
+        <slot v-else-if="item.slot" :name="item.slot"></slot>
 
         <!-- 常规字符输入框 -->
         <el-input
           v-else
-          v-model="searchData[item.prop]"
+          v-model="formData[item.prop]"
           :disabled="item.disabled"
           :placeholder="item.placeholder"
         ></el-input>
@@ -64,15 +65,28 @@
         :width="item.width || 'auto'"
       >
         <template slot-scope="scope">
+          <!-- 普通文本按钮 -->
           <el-button
             v-if="item.target === 'button'"
+            :type="item.buttonType"
+            @click="onTableDataClick(scope.row, item)"
           >{{item.buttonText ? item.buttonText : scope.row[item.prop]}}</el-button>
-          <slot v-else-if="item.slot" :name="item.slot"></slot>
-          <template v-else>{{item.call ? item.call(scope.row, item.prop) : scope.row[item.prop]}}</template>
+
+          <!-- span文本修饰 -->
+          <span
+            v-else-if="item.target === 'span'"
+            :class="item.class ? item.class(scope.row, item.prop) : ''"
+          >{{item.changeText ? item.changeText(scope.row, item.prop) : scope.row[item.prop]}}</span>
+
+          <!-- 插槽作用 -->
+          <slot v-else-if="item.slot" :name="item.slot" :data="scope.row">-</slot>
+
+          <!-- 默认文本 -->
+          <template
+            v-else
+          >{{item.changeText ? item.changeText(scope.row, item.prop) : scope.row[item.prop]}}</template>
         </template>
       </el-table-column>
-
-      <slot name="table-option"></slot>
     </el-table>
 
     <slot name="pagination"></slot>
@@ -83,11 +97,11 @@
 export default {
   name: "form-table",
   props: {
-    searchProps: {
+    formProps: {
       type: Array,
       default: []
     },
-    searchData: {
+    formData: {
       type: Object,
       default: {}
     },
@@ -118,7 +132,32 @@ export default {
      * 表单确认
      */
     onConfirm() {
-      this.$emit("confirm", this.searchData);
+      this.$emit("confirm", this.formData);
+    },
+
+    /**
+     * 表格数据点击
+     * @param {Objecy} obj 数据对象
+     * @param {Object} option 字段配置对象
+     */
+    onTableDataClick(obj, option) {
+      if (option.call) {
+        option.call(obj, option);
+      } else {
+        this.$emit("data-click", obj, option);
+      }
+    },
+
+    /**
+     * 表单数据改变
+     * @param {Object} option 字段配置对象
+     */
+    onFormDataChange(option) {
+      if (option.call) {
+        option.call(this.formData, option);
+      } else {
+        this.$emit("data-change", this.formData, option);
+      }
     }
   }
 };

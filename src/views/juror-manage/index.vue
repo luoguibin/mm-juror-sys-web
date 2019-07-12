@@ -1,46 +1,27 @@
 <template>
   <div class="juror-manage">
-    <div class="juror-manage_header">
-      <span>已陪审案件数排序&nbsp;</span>
-      <el-select v-model="orderType" @change="handleOrderTypeChange">
-        <el-option :value="-1" label="默认"></el-option>
-        <el-option :value="0" label="从多到少"></el-option>
-        <el-option :value="1" label="从少到多"></el-option>
-      </el-select>
-      <el-divider direction="vertical"></el-divider>
+    <form-table
+      :formProps="formProps"
+      :formData="formData"
+      :tableColumns="tableColumns"
+      :tableData="tableData"
+      :tableLoading="tableLoading"
+      confirmText="搜索"
+      @confirm="handleConfirm"
+    >
+      <template slot="form-end">
+        <el-divider direction="vertical"></el-divider>
+        <el-button @click="onOpenNewJuror()" type="primary">新增陪审员</el-button>
+      </template>
 
-      <el-button @click="onOpenNewJuror()" type="primary">新增陪审员</el-button>
-    </div>
-
-    <!-- 表格 -->
-    <div class="juror-manage_main">
-      <el-table :data="tableData" border v-loading="tableLoading">
-        <el-table-column
-          v-for="column in tableColumns"
-          :key="column.prop"
-          :prop="column.prop"
-          :label="column.label"
-        >
-          <template slot-scope="scope">
-            <template v-if="column.prop === 'caseCount'">
-              <el-button type="text" @click="onCaseCount(scope.row)">{{scope.row[column.prop]}}</el-button>
-            </template>
-            <template
-              v-else
-            >{{column.call ? column.call(scope.row, column.prop) : scope.row[column.prop]}}</template>
-          </template>
-        </el-table-column>
-
-        <!-- 操作按钮 -->
-        <el-table-column label="操作">
-          <template slot-scope="scope">
-            <el-button type="text" @click="onOpenEidtDialog(scope.row)">编辑</el-button>
-            <el-button type="text" v-if="authType >= 5" @click="onDelete(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <!-- 操作按钮插槽 -->
+      <template #table-option="{data}">
+        <el-button type="text" @click="onOpenEidtDialog(data)">编辑</el-button>
+        <el-button type="text" v-if="authType >= 5" @click="onDelete(data)">删除</el-button>
+      </template>
 
       <el-pagination
+        slot="pagination"
         layout="prev, pager, next"
         background
         hide-on-single-page
@@ -48,43 +29,73 @@
         :current-page="currentPage"
         @current-change="handlePageChange"
       ></el-pagination>
-    </div>
+    </form-table>
   </div>
 </template>
 
 <script>
 import Vue from "vue";
 import { mapGetters } from "vuex";
+import FormTable from "../../components/form-table";
 import { getJurors } from "../../http/api/juror-manage";
 
 export default {
   name: "juror-manage",
+  components: {
+    FormTable
+  },
+
   data() {
     return {
-      tableLoading: false,
-      tableData: [],
+      formProps: [
+        { prop: "id", label: "ID", target: "number", placeholder: "请输入ID", disabled: true },
+        {
+          prop: "orderType",
+          label: "案件数排序",
+          target: "select",
+          options: [
+            { value: 0, label: "所有" },
+            { value: 1, label: "从多到少" },
+            { value: 2, label: "从少到多" }
+          ],
+          call: this.getJurors
+        }
+      ],
+      formData: {
+        orderType: 2
+      },
       tableColumns: [
         { prop: "id", label: "ID" },
         { prop: "name", label: "姓名" },
         {
           prop: "sex",
           label: "性别",
-          call(target, key) {
+          changeText(target, key) {
             return target[key] ? "男" : "女";
           }
         },
         { prop: "company", label: "工作单位" },
-        { prop: "caseCount", label: "已陪审案件数" },
+        {
+          prop: "caseCount",
+          label: "已陪审案件数",
+          target: "button",
+          buttonType: "text",
+          call: this.onCaseCount
+        },
         { prop: "phone", label: "手机号码" },
         { prop: "address", label: "地址" },
         {
           prop: "timeCreate",
           label: "创建时间",
-          call(target, key) {
+          changeText(target, key) {
             return Vue.filter("time-filter")(target[key]);
           }
-        }
+        },
+        { prop: "table-option", label: "操作", slot: "table-option" }
       ],
+      tableData: [],
+      tableLoading: false,
+
       tableTotal: 0,
       currentPage: 1,
 
@@ -107,13 +118,14 @@ export default {
       this.getJurors();
     },
 
-    handleOrderTypeChange() {
+    handleConfirm(data) {
+      console.log(data);
       this.getJurors();
     },
 
     getJurors() {
       this.tableLoading = true;
-      getJurors({ page: this.currentPage, orderType: this.orderType })
+      getJurors({ page: this.currentPage, ...this.formData })
         .then(({ data }) => {
           this.tableData = data.data;
           this.tableTotal = data.total;
@@ -123,8 +135,9 @@ export default {
         });
     },
 
-    onCaseCount(data) {
+    onCaseCount(data, option) {
       this.$message("过阵子开放该功能");
+      console.log("onCaseCount", data, option);
     },
 
     onOpenEidtDialog(info) {

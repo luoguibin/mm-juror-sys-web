@@ -6,7 +6,7 @@ export const getJurors = params => {
         const limit = params.limit || 10;
         const start = (page - 1) * limit;
         const orderType = params.orderType;
-        if (orderType === -1) {
+        if (!orderType) {
             resolve({
                 data: {
                     code: 1000,
@@ -17,7 +17,7 @@ export const getJurors = params => {
             })
         } else {
             const tempJurors = apiData.jurors.filter(o => true);
-            if (orderType === 0) {
+            if (orderType === 1) {
                 tempJurors.sort(function (a, b) {
                     return a.caseCount < b.caseCount ? 1 : -1;
                 })

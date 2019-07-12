@@ -6,7 +6,7 @@ export const getLawCases = params => {
         const limit = params.limit || 10;
         const start = (page - 1) * limit;
 
-        if (params.status === -1) {
+        if (!params.status) {
             resolve({
                 data: {
                     code: 1000,

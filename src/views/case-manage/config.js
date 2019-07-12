@@ -40,9 +40,9 @@ export const CaseUtil = {
     },
 
     statusMap: {
-        0: "可审办",
-        1: "已分配",
-        2: "已完结"
+        1: "可审办",
+        2: "已分配",
+        3: "已完结"
     },
 
     makeStatus(val) {

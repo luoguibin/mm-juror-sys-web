@@ -1,54 +1,37 @@
 <template>
   <div class="case-manage">
-    <div class="case-manage_header">
-      <span>案件状态&nbsp;</span>
-      <el-select v-model="currentStatus" @change="handleStatusChange">
-        <el-option :value="-1" label="所有"></el-option>
-        <el-option :value="0" label="可审办"></el-option>
-        <el-option :value="1" label="已分配"></el-option>
-        <el-option :value="2" label="已完结"></el-option>
-      </el-select>
-      <el-divider direction="vertical"></el-divider>
-      <el-button @click="onOpenNewCase()" type="primary">新增案件</el-button>
-    </div>
+    <form-table
+      :formProps="formProps"
+      :formData="formData"
+      :tableColumns="tableColumns"
+      :tableData="tableData"
+      :tableLoading="tableLoading"
+      confirmText="搜索"
+      @confirm="handleConfirm"
+    >
+      <template slot="form-end">
+        <el-divider direction="vertical"></el-divider>
+        <el-button @click="onOpenNewCase()" type="primary">新增案件</el-button>
+      </template>
 
-    <!-- 表格 -->
-    <div class="case-manage_main">
-      <el-table :data="tableData" border v-loading="tableLoading">
-        <el-table-column
-          v-for="column in tableColumns"
-          :key="column.prop"
-          :prop="column.prop"
-          :label="column.label"
-        >
-          <template slot-scope="scope">
-            <template v-if="column.prop === 'jurors'">
-              <el-button
-                v-for="juror in scope.row.jurors"
-                :key="juror.id"
-                type="text"
-                @click="onOpenJuror"
-              >{{juror.name}}</el-button>
-            </template>
+      <template #jurors="{data}">
+        <el-button
+          v-for="juror in data.jurors"
+          :key="juror.id"
+          type="text"
+          @click="onOpenJuror(juror)"
+        >{{juror.name}}</el-button>
+      </template>
 
-            <span
-              v-else
-              :class="column.class ? column.class(scope.row, column.prop) : ''"
-            >{{ column.call ? column.call(scope.row, column.prop) : scope.row[column.prop]}}</span>
-          </template>
-        </el-table-column>
-
-        <!-- 操作按钮 -->
-        <el-table-column label="操作">
-          <template slot-scope="scope">
-            <el-button type="text" v-if="scope.row.status == 0" @click="onDistribute(scope.row)">分配</el-button>
-            <el-button type="text" @click="onOpenEidtDialog(scope.row)">编辑</el-button>
-            <el-button type="text" v-if="authType >= 5" @click="onDelete(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <!-- 操作按钮插槽 -->
+      <template #table-option="{data}">
+        <el-button type="text" v-if="data.status == 0" @click="onDistribute(data)">分配</el-button>
+        <el-button type="text" @click="onOpenEidtDialog(data)">编辑</el-button>
+        <el-button type="text" v-if="authType >= 5" @click="onDelete(data)">删除</el-button>
+      </template>
 
       <el-pagination
+        slot="pagination"
         layout="prev, pager, next"
         background
         hide-on-single-page
@@ -56,7 +39,7 @@
         :current-page="currentPage"
         @current-change="handlePageChange"
       ></el-pagination>
-    </div>
+    </form-table>
 
     <!-- 陪审员分配对话框 -->
     <el-dialog :visible.sync="randomVisible" title="陪审员分配">
@@ -68,47 +51,70 @@
 <script>
 import Vue from "vue";
 import { mapGetters } from "vuex";
+import FormTable from "../../components/form-table";
 import { getLawCases } from "../../http/api/case-manage";
 import { CaseUtil } from "./config";
 
 export default {
   name: "case-manage",
   components: {
+    FormTable,
     "random-panel": () => import("../../components/random-panel/index")
   },
   data() {
     return {
-      tableLoading: false,
-      tableData: [],
+      formProps: [
+        { prop: "id", label: "ID", target: "number", disabled: true, placeholder: "请输入ID" },
+        {
+          prop: "status",
+          label: "案件状态",
+          target: "select",
+          options: [
+            { value: 0, label: "所有" },
+            { value: 1, label: "可审办" },
+            { value: 2, label: "已分配" },
+            { value: 3, label: "已完结" }
+          ],
+          call: this.getLawCases
+        }
+      ],
+      formData: {
+        status: 1
+      },
       tableColumns: [
         { prop: "id", label: "ID" },
         {
           prop: "title",
           label: "案号",
-          call(target) {
-            return CaseUtil.makeTitle(target);
+          changeText(obj) {
+            return CaseUtil.makeTitle(obj);
           }
         },
         { prop: "department", label: "承办部门" },
         {
           prop: "status",
           label: "状态",
-          class(target, key) {
-            return ["case-manage_status", "case-manage_status__" + target[key]];
+          target: "span",
+          class(obj, key) {
+            return ["case-manage_status", "case-manage_status__" + obj[key]];
           },
-          call(target, key) {
-            return CaseUtil.makeStatus(target[key]);
+          changeText(obj, key) {
+            return CaseUtil.makeStatus(obj[key]);
           }
         },
-        { prop: "jurors", label: "陪审员" },
+        { prop: "jurors", label: "陪审员", slot: "jurors" },
         {
           prop: "timeCreate",
           label: "创建时间",
-          call(target, key) {
-            return Vue.filter("time-filter")(target[key]);
+          changeText(obj, key) {
+            return Vue.filter("time-filter")(obj[key]);
           }
-        }
+        },
+        { prop: "table-option", label: "操作", slot: "table-option" }
       ],
+      tableData: [],
+      tableLoading: false,
+
       tableTotal: 0,
       currentStatus: 0,
       currentPage: 1,
@@ -133,7 +139,7 @@ export default {
       this.getLawCases();
     },
 
-    handleStatusChange(value) {
+    handleConfirm(data) {
       this.getLawCases();
     },
 
@@ -145,7 +151,7 @@ export default {
 
     getLawCases() {
       this.tableLoading = true;
-      getLawCases({ page: this.currentPage, status: this.currentStatus })
+      getLawCases({ page: this.currentPage, ...this.formData })
         .then(({ data }) => {
           this.tableData = data.data;
           this.tableTotal = data.total;
@@ -171,6 +177,7 @@ export default {
     },
 
     onOpenJuror(info) {
+      console.log("onOpenJuror", info);
       this.$message("过阵子开放该功能");
     },
 
@@ -183,20 +190,6 @@ export default {
 
 <style lang="scss" scoped>
 .case-manage {
-  #{&}_status {
-    color: white;
-    padding: 5px 8px;
-    border-radius: 5px;
-  }
-  #{&}_status__0 {
-    background-color: rgb(84, 161, 100);
-  }
-  #{&}_status__1 {
-    background-color: rgb(84, 132, 194);
-  }
-  #{&}_status__2 {
-    background-color: rgb(153, 153, 153);
-  }
 }
 </style>
 
@@ -204,6 +197,21 @@ export default {
 .case-manage {
   .el-dialog {
     min-width: 700px;
+  }
+
+  #{&}_status {
+    color: white;
+    padding: 5px 8px;
+    border-radius: 5px;
+  }
+  #{&}_status__1 {
+    background-color: rgb(84, 161, 100);
+  }
+  #{&}_status__2 {
+    background-color: rgb(84, 132, 194);
+  }
+  #{&}_status__3 {
+    background-color: rgb(153, 153, 153);
   }
 }
 </style>
