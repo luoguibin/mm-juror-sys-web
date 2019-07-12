@@ -25,7 +25,7 @@
 
       <!-- 操作按钮插槽 -->
       <template #table-option="{data}">
-        <el-button type="text" v-if="data.status == 0" @click="onDistribute(data)">分配</el-button>
+        <el-button type="text" v-if="data.status == 1" @click="onDistribute(data)">分配</el-button>
         <el-button type="text" @click="onOpenCaseDialog(data)">编辑</el-button>
         <el-button type="text" v-if="authType >= 5" @click="onDelete(data)">删除</el-button>
       </template>

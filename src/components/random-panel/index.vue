@@ -32,7 +32,7 @@
 
       <!-- 操作按钮 -->
       <el-form-item disabled="false" label-width="100px">
-        <el-button type="primary" :disabled="caseData.status !== 0" @click="onSave">保存</el-button>
+        <el-button type="primary" :disabled="caseData.status !== 1" @click="onSave">保存</el-button>
         <el-button type="primary" @click="onSearch">搜索</el-button>
       </el-form-item>
     </el-form>
@@ -56,7 +56,7 @@ export default {
     return {
       caseColumns: [
         { prop: "id", label: "ID" },
-        { prop: "title", label: "标题" },
+        { prop: "title", label: "案号" },
         { prop: "jurors", label: "陪审员" },
         {
           prop: "timeCreate",
@@ -108,7 +108,7 @@ export default {
 
     onSave() {
       const caseData = this.caseData;
-      if (caseData.status !== 0) {
+      if (caseData.status !== 1) {
         this.$message("该案件已分配陪审员或已完结");
         return;
       }

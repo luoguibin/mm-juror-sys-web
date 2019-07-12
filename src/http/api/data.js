@@ -179,7 +179,7 @@ apiData.saveCaseJurors = function (data) {
     }
 
     const tempJurors = [];
-    params.jurors.forEach(o => {
+    data.jurors.forEach(o => {
         const juror = this.jurors.find(o_ => {
             return o_.id === o.id;
         });
@@ -187,9 +187,9 @@ apiData.saveCaseJurors = function (data) {
             tempJurors.push(juror);
         }
     })
-    const flag = tempJurors.length && tempJurors.length === params.jurors.length;
+    const flag = tempJurors.length && tempJurors.length === data.jurors.length;
     if (flag) {
-        lawCase.jurors = params.jurors;
+        lawCase.jurors = data.jurors;
         lawCase.status += 1;
         tempJurors.forEach(o => {
             o.caseCount++;
