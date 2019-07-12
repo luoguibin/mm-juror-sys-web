@@ -45,11 +45,13 @@ const jurors = apiData.jurors;
 
 // 处理用户列表
 apiData.users.forEach((user, index) => {
-    if (Math.random() < 0.05 || index < 3) {
+    if (Math.random() < 0.05 || index < 1) {
         user.authType = 5;
     }
     user.jurorId = jurors[index].id;
 });
+apiData.users[1].authType = 1;
+
 apiData.users.push({
     id: 15688888888,
     pw: "123456",
@@ -72,7 +74,7 @@ apiData.addUser = function (user) {
     if (target) {
         return null;
     }
-    user.authType = 1;
+    user.authType = user.authType || 1;
     user.jurorId = 0;
     user.timeCreate = new Date().getTime();
     this.users.push(user);
@@ -86,6 +88,7 @@ apiData.updateUser = function (user) {
     if (target) {
         target.name = user.name || target.name;
         target.pw = user.pw || target.pw;
+        target.authType = user.authType || target.authType;
         return true;
     }
     return false;

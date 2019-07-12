@@ -17,7 +17,11 @@
       <!-- 操作按钮插槽 -->
       <template #table-option="{data}">
         <el-button type="text" @click="onOpenDialog(data)">详情</el-button>
-        <el-button type="text" v-if="authType >= 5" @click="onDelete(data)">删除</el-button>
+        <el-button
+          type="text"
+          v-if="authType >= 5 && data.authType < authType"
+          @click="onDelete(data)"
+        >删除</el-button>
       </template>
 
       <el-pagination
@@ -36,7 +40,7 @@
       <el-form ref="form" :model="editData" label-width="80px" autocomplete="off">
         <!-- 输入框 -->
         <el-form-item label="账 号" prop="id">
-          <el-input v-model.number="editData.id" type="tel"></el-input>
+          <el-input v-model.number="editData.id" type="tel" :disabled="idDisabled"></el-input>
         </el-form-item>
         <el-form-item label="昵 称" prop="name">
           <el-input v-model.trim="editData.name"></el-input>
@@ -46,6 +50,13 @@
         </el-form-item>
         <el-form-item v-if="false && isEditData" label="重复密码" prop="pw2">
           <el-input v-model="editData.pw2" show-password clearable></el-input>
+        </el-form-item>
+        <el-form-item label="权 限" prop="authType" v-if="authType >= 5">
+          <el-select v-model="editData.authType">
+            <el-option label="普通用户" :value="1"></el-option>
+            <el-option label="管理员" :value="5"></el-option>
+            <el-option v-if="authType >= 9" label="超级管理员" :value="9"></el-option>
+          </el-select>
         </el-form-item>
 
         <!-- 功能按钮 -->
@@ -86,9 +97,13 @@ export default {
           label: "ID",
           target: "number",
           placeholder: "请输入ID",
-          disabled: true
+          disabled: false
         },
-        { prop: "name", label: "名称", disabled: true, placeholder: "请输入名称..." },
+        {
+          prop: "name",
+          label: "名称",
+          placeholder: "请输入名称..."
+        },
         {
           prop: "authType",
           label: "账号类型",
@@ -100,11 +115,26 @@ export default {
           ]
         }
       ],
-      formData: {},
+      formData: { authType: 0 },
       tableColumns: [
         { prop: "id", label: "ID" },
-        { prop: "name", label: "名称", width: "100px" },
-        { prop: "authType", label: "账号类型", width: "100px" },
+        { prop: "name", label: "名称" },
+        {
+          prop: "authType",
+          label: "账号类型",
+          changeText(obj, key) {
+            const authType = obj[key];
+            if (authType === 1) {
+              return "普通用户";
+            } else if (authType === 5) {
+              return "管理员";
+            } else if (authType === 9) {
+              return "超级管理员";
+            } else {
+              return "未知";
+            }
+          }
+        },
         {
           prop: "timeCreate",
           label: "创建时间",
@@ -123,12 +153,17 @@ export default {
       dialogVisible: false,
       isEditData: false,
       inRequest: false,
+      idDisabled: false,
       editData: {}
     };
   },
 
   created() {
     window.userManage = this;
+    if (this.authType >= 9) {
+      const authTypeProp = this.formProps.find(o => o.prop === "authType");
+      authTypeProp.options.push({ value: 9, label: "超级管理员" });
+    }
     this.getUserList();
   },
 
@@ -139,7 +174,12 @@ export default {
   methods: {
     getUserList() {
       this.tableLoading = true;
-      getUserList({ token: true, page: this.currentPage, ...this.formData })
+      getUserList({
+        token: true,
+        mAuthType: this.authType,
+        page: this.currentPage,
+        ...this.formData
+      })
         .then(({ data }) => {
           this.tableData = data.data;
           this.tableTotal = data.total;
@@ -150,8 +190,8 @@ export default {
     },
 
     handleConfirm(data) {
-      console.log("handleConfirm", data);
-      this.$message("过阵子开放改功能");
+      this.currentPage = 1;
+      this.getUserList();
     },
 
     handlePageChange(page) {
@@ -163,7 +203,9 @@ export default {
       this.dialogVisible = true;
       if (info) {
         this.editData = JSON.parse(JSON.stringify(info));
+        this.idDisabled = true;
       } else {
+        this.idDisabled = false;
         this.editData = {
           id: null,
           name: "",

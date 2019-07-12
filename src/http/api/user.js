@@ -139,13 +139,44 @@ export const getUserMenu = ({ authType }) => {
 
 export const getUserList = params => {
     return new Promise(function (resolve, reject) {
+        const id = params.id;
+        const authType = params.authType || 0;
+
+        if (id) {
+            let user = apiData.users.find(o => o.id === id);
+            if (user && (authType !== 0 && user.authType !== authType)) {
+                user = null;
+            }
+            resolve({
+                data: {
+                    data: user ? [user] : [],
+                    total: user ? 1 : 0,
+                    code: user ? 1000 : 1001,
+                    msg: user ? "获取成功" : "获取失败"
+                }
+            })
+            return;
+        }
         const page = params.page || 1;
         const limit = params.limit || 10;
         const start = (page - 1) * limit;
+        const mAuthType = params.mAuthType || 1;
+        const name = params.name;
+
+        let temp = apiData.users.filter(o => {
+            if (authType === 0) {
+                return o.authType <= mAuthType;
+            } else {
+                return o.authType === authType;
+            }
+        });
+        if (name && temp.length) {
+            temp = temp.filter(o => o.name.includes(name))
+        }
         resolve({
             data: {
-                data: apiData.users.slice(start, start + limit),
-                total: apiData.userTotal(),
+                data: temp.slice(start, start + limit),
+                total: temp.length,
                 code: 1000,
                 msg: "获取成功"
             }
