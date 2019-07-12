@@ -1,34 +1,29 @@
 <template>
   <div class="user-manage">
-    <div class="user-manage_header">
-      <el-button @click="onOpenDialog()" type="primary">新增用户</el-button>
-    </div>
+    <form-table
+      :searchProps="searchProps"
+      :searchData="searchData"
+      :tableColumns="tableColumns"
+      :tableData="tableData"
+      :tableLoading="tableLoading"
+      confirmText="搜索"
+      @confirm="handleConfirm"
+    >
+      <template slot="form-end">
+        <el-divider direction="vertical"></el-divider>
+        <el-button @click="onOpenDialog()" type="primary">新增用户</el-button>
+      </template>
 
-    <!-- 表格 -->
-    <div class="user-manage_main">
-      <el-table :data="tableData" border v-loading="tableLoading">
-        <el-table-column
-          v-for="column in tableColumns"
-          :key="column.prop"
-          :prop="column.prop"
-          :label="column.label"
-        >
-          <template slot-scope="scope">
-            <template v-if="column.prop === 'timeCreate'">{{scope.row[column.prop] | time-filter}}</template>
-            <template v-else>{{scope.row[column.prop]}}</template>
-          </template>
-        </el-table-column>
-
-        <!-- 操作按钮 -->
-        <el-table-column label="操作">
-          <template slot-scope="scope">
-            <el-button type="text" @click="onOpenDialog(scope.row)">详情</el-button>
-            <el-button type="text" v-if="authType >= 5" @click="onDelete(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <!-- 操作按钮插槽 -->
+      <el-table-column slot="table-option" label="操作">
+        <template slot-scope="scope">
+          <el-button type="text" @click="onOpenDialog(scope.row)">详情</el-button>
+          <el-button type="text" v-if="authType >= 5" @click="onDelete(scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
 
       <el-pagination
+        slot="pagination"
         layout="prev, pager, next"
         background
         hide-on-single-page
@@ -36,8 +31,9 @@
         :current-page="currentPage"
         @current-change="handlePageChange"
       ></el-pagination>
-    </div>
+    </form-table>
 
+    <!-- 新增或编辑用户信息对话框 -->
     <el-dialog :visible.sync="dialogVisible" :title="isEditData ? '编辑用户' : '新增用户'">
       <el-form ref="form" :model="editData" label-width="80px" autocomplete="off">
         <!-- 输入框 -->
@@ -69,7 +65,9 @@
 </template>
 
 <script>
+import Vue from "vue";
 import { mapGetters } from "vuex";
+import FormTable from "../../components/form-table";
 import {
   getUserList,
   createAccount,
@@ -79,17 +77,47 @@ import {
 
 export default {
   name: "user-manage",
+  components: {
+    FormTable
+  },
   data() {
     return {
-      tableLoading: false,
-      tableData: [],
+      searchProps: [
+        {
+          prop: "id",
+          label: "ID",
+          target: "number",
+          placeholder: "请输入ID",
+          disabled: true
+        },
+        { prop: "name", label: "名称", placeholder: "请输入名称..." },
+        {
+          prop: "authType",
+          label: "账号类型",
+          target: "select",
+          options: [
+            { value: 0, label: "全部" },
+            { value: 1, label: "普通用户" },
+            { value: 5, label: "管理员" }
+          ]
+        }
+      ],
+      searchData: {},
       tableColumns: [
         { prop: "id", label: "ID" },
-        { prop: "name", label: "名称" },
-        { prop: "authType", label: "账号类型" },
-        //  {prop: "iconUrl", label: "iconUrl"},
-        { prop: "timeCreate", label: "创建时间" }
+        { prop: "name", label: "名称", width: "100px" },
+        { prop: "authType", label: "账号类型", width: "100px" },
+        {
+          prop: "timeCreate",
+          label: "创建时间",
+          call(target, key) {
+            return Vue.filter("time-filter")(target[key]);
+          }
+        }
       ],
+      tableData: [],
+      tableLoading: false,
+
       tableTotal: 0,
       currentPage: 1,
 
@@ -122,6 +150,10 @@ export default {
         });
     },
 
+    handleConfirm(data) {
+      console.log("handleConfirm", data);
+    },
+
     handlePageChange(page) {
       this.currentPage = page;
       this.getUserList();
@@ -129,7 +161,6 @@ export default {
 
     onOpenDialog(info) {
       this.dialogVisible = true;
-      console.log(info);
       if (info) {
         this.editData = JSON.parse(JSON.stringify(info));
       } else {
