@@ -71,6 +71,21 @@ export const getLawCase = params => {
     })
 }
 
+export const deleteLawCase = params => {
+    return new Promise(function (resolve, reject) {
+        const index = apiData.lawCases.findIndex(o => o.id === params.id);
+        if (index >= 0) {
+            apiData.lawCases.splice(index, 1);
+        }
+        resolve({
+            data: {
+                code: index >= 0 ? 1000 : 1001,
+                msg: index >= 0 ? "删除成功" : "删除失败"
+            }
+        })
+    })
+}
+
 export const saveLawCaseJurors = params => {
     return new Promise(function (resolve, reject) {
         const flag = apiData.saveCaseJurors(params);
@@ -90,6 +105,23 @@ export const saveLawCase = data => {
             data: {
                 code: flag ? 1000 : 1001,
                 msg: flag ? "保存成功" : "保存失败"
+            }
+        })
+    })
+}
+
+export const getCaseConfig = () => {
+    return new Promise(function (resolve, reject) {
+        resolve({
+            data: {
+                code: 1000,
+                data: {
+                    servantUnits: apiData.servantUnits,
+                    caseTypes: apiData.caseTypes,
+                    statuses: apiData.statuses,
+                    caseProvinces: apiData.caseProvinces
+                },
+                msg: "获取成功"
             }
         })
     })

@@ -44,9 +44,15 @@ export default {
   },
   data() {
     return {
-      provinceOptions: CaseUtil.getCaseProvinces(),
+      provinceOptions: CaseUtil.caseProvinces.map(o => ({
+        value: o.id,
+        label: o.name
+      })),
       caseTypeMap: CaseUtil.caseTypeMap,
-      caseTypeOptions: CaseUtil.getCaseTypes()
+      caseTypeOptions: CaseUtil.caseTypes.map(o => ({
+        value: o.id,
+        label: o.name
+      }))
     };
   },
 

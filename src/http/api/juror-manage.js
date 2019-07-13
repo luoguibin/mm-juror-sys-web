@@ -2,6 +2,23 @@ import apiData from "./data";
 
 export const getJurors = params => {
     return new Promise(function (resolve, reject) {
+        const id = params.id;
+        if (id) {
+            const juror = apiData.jurors.find(o => {
+                return o.id === id;
+            });
+            if (juror) {
+                juror.servantUnit = apiData.findServantUnit(juror.servantUnitId)
+            }
+            resolve({
+                data: {
+                    code: juror ? 1000 : 1001,
+                    msg: juror ? "查询成功" : "查询失败",
+                    data: juror ? [juror] : []
+                }
+            })
+            return;
+        }
         const page = params.page || 1;
         const limit = params.limit || 10;
         const start = (page - 1) * limit;
@@ -71,6 +88,33 @@ export const getUndertakers = params => {
                     servantUnits: apiData.servantUnits
                 },
                 msg: "获取成功"
+            }
+        })
+    })
+}
+
+export const deleteJuror = params => {
+    return new Promise(function (resolve, reject) {
+        const index = apiData.jurors.findIndex(o => o.id === params.id);
+        if (index >= 0) {
+            apiData.jurors.splice(index, 1);
+        }
+        resolve({
+            data: {
+                code: index >= 0 ? 1000 : 1001,
+                msg: index >= 0 ? "删除成功" : "删除失败"
+            }
+        })
+    })
+}
+
+export const saveJuror = data => {
+    return new Promise(function (resolve, reject) {
+        const flag = apiData.saveJuror(data);
+        resolve({
+            data: {
+                code: flag ? 1000 : 1001,
+                msg: flag ? "保存成功" : "保存失败"
             }
         })
     })

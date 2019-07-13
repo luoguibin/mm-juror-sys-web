@@ -27,7 +27,7 @@
       <template #table-option="{data}">
         <el-button
           type="text"
-          v-if="authType >= 5 && data.status == 1"
+          v-if="authType >= 5 && data.status === randomStatus"
           @click="onDistribute(data)"
         >分配</el-button>
         <el-button type="text" v-if="authType >= 5" @click="onOpenCaseDialog(data)">编辑</el-button>
@@ -74,7 +74,12 @@ import Vue from "vue";
 import { mapGetters } from "vuex";
 import FormTable from "../../components/form-table";
 import CaseTitle from "./case-title";
-import { getLawCases, saveLawCase } from "../../http/api/case-manage";
+import {
+  getLawCases,
+  saveLawCase,
+  deleteLawCase,
+  getCaseConfig
+} from "../../http/api/case-manage";
 import { getUndertakers } from "../../http/api/juror-manage";
 import { getUserList } from "../../http/api/user";
 
@@ -101,17 +106,15 @@ export default {
           prop: "status",
           label: "案件状态",
           target: "select",
-          options: [
-            { value: 0, label: "所有" },
-            { value: 1, label: "可审办" },
-            { value: 2, label: "已分配" },
-            { value: 3, label: "已完结" }
-          ],
-          call: this.getLawCases
+          options: [{ value: 0, label: "所有" }],
+          call: () => {
+            this.currentPage = 1;
+            this.getLawCases();
+          }
         }
       ],
       formData: {
-        status: 1
+        status: 0
       },
       tableColumns: [
         { prop: "id", label: "ID" },
@@ -165,6 +168,7 @@ export default {
       currentPage: 1,
 
       randomVisible: false,
+      randomStatus: 0,
       randomCase: null,
 
       caseVisible: false,
@@ -197,7 +201,25 @@ export default {
 
   created() {
     window.caseManage = this;
-    this.getLawCases();
+
+    getCaseConfig().then(({ data }) => {
+      CaseUtil.servantUnits = data.data.servantUnits;
+      CaseUtil.caseTypes = data.data.caseTypes;
+      CaseUtil.caseProvinces = data.data.caseProvinces;
+      CaseUtil.statuses = data.data.statuses;
+      CaseUtil.resetMap();
+
+      const options = CaseUtil.statuses.map(o => ({
+        value: o.id,
+        label: o.name
+      }));
+      this.formData.status = options[0].value;
+      this.randomStatus = options[0].value;
+      this.formProps[1].options = this.formProps[1].options.concat(options);
+
+      this.getLawCases();
+      // this.$forceUpdate();
+    });
   },
 
   computed: {
@@ -215,7 +237,7 @@ export default {
     },
 
     handleConfirmCase(data) {
-      const keys = ["caseYear", "caseType", "caseCode", "undertaker"];
+      const keys = ["caseYear", "caseType", "caseCode", "undertakerId"];
       let count = 0;
       keys.forEach(key => {
         if (data[key]) {
@@ -316,7 +338,17 @@ export default {
     },
 
     onDelete(info) {
-      this.$message("过阵子开放该功能");
+      this.$confirm("确定删除?", "系统提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消"
+      })
+        .then(() => {
+          deleteLawCase({ id: info.id }).then(({ data }) => {
+            this.$message(data.msg);
+            this.getLawCases();
+          });
+        })
+        .catch(() => {});
     },
 
     onOpenJuror(info) {
@@ -347,13 +379,13 @@ export default {
     padding: 5px 8px;
     border-radius: 5px;
   }
-  #{&}_status__1 {
+  #{&}_status__101 {
     background-color: rgb(84, 161, 100);
   }
-  #{&}_status__2 {
+  #{&}_status__102 {
     background-color: rgb(84, 132, 194);
   }
-  #{&}_status__3 {
+  #{&}_status__103 {
     background-color: rgb(153, 153, 153);
   }
 }

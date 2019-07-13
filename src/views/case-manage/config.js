@@ -1,62 +1,39 @@
 export const CaseUtil = {
 
-    caseProvinceMap: {
-        440000: "粤0904"
-    },
+    caseProvinceMap: {},
+    caseProvinces: [],
 
-    getCaseProvinces() {
-        const results = [],
-            caseMap = this.caseProvinceMap;
-        Object.keys(caseMap).forEach(key => {
-            results.push({ value: +key, label: caseMap[key] })
+    caseTypeMap: {},
+    caseTypes: [],
+
+    statuses: [],
+    statusMap: {},
+
+    servantUnits: [],
+    servantUnitMap: {},
+
+    resetMap() {
+        this.caseProvinces.forEach(o => {
+            this.caseProvinceMap[o.id] = o.name;
         });
-        return results;
-    },
-
-    caseTypeMap: {
-        1001: "民初",
-        1002: "民终",
-        1003: "刑初",
-        1004: "刑终"
-    },
-
-    getCaseTypes() {
-        const results = [],
-            caseMap = this.caseTypeMap;
-        Object.keys(caseMap).forEach(key => {
-            results.push({ value: +key, label: caseMap[key] })
+        this.caseTypes.forEach(o => {
+            this.caseTypeMap[o.id] = o.name;
         });
-        return results;
-    },
-
-    departmentMap: {
-        1: "市案件管理部门",
-        2: "乡镇案件管理部门"
-    },
-
-    getDepartments() {
-        const results = [],
-            caseMap = this.departmentMap;
-        Object.keys(caseMap).forEach(key => {
-            results.push({ value: +key, label: caseMap[key] })
+        this.statuses.forEach(o => {
+            this.statusMap[o.id] = o.name;
         });
-        return results;
+        this.servantUnits.forEach(o => {
+            this.servantUnitMap[o.id] = o.name;
+        });
     },
 
     // caseYear: new Date().getFullYear(),
     // caseCode: 100,
-
+    // （2019）粤0904刑初1514号
     makeTitle(lawCase) {
-        // （2019）粤0904刑初1514号
         const caseProvince = this.caseProvinceMap[lawCase.caseProvince],
             caseType = this.caseTypeMap[lawCase.caseType];
         return `(${lawCase.caseYear})${caseProvince}${caseType}${lawCase.caseCode}号`
-    },
-
-    statusMap: {
-        1: "可审办",
-        2: "已分配",
-        3: "已完结"
     },
 
     makeStatus(val) {

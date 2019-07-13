@@ -32,8 +32,8 @@
 
       <!-- 操作按钮 -->
       <el-form-item disabled="false" label-width="100px">
-        <el-button type="primary" :disabled="caseData.status !== 1" @click="onSave">保存</el-button>
-        <el-button type="primary" @click="onSearch">搜索</el-button>
+        <el-button type="primary" @click="onSave">确定</el-button>
+        <el-button type="primary" @click="onSearch" v-if="false">搜索</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -101,29 +101,24 @@ export default {
 
     onRandomJuror() {
       getLowJurors().then(({ data }) => {
-        console.log(data);
         this.caseData.jurors = data.data;
+
+        const caseData = this.caseData;
+        if (caseData.jurors.length < 2) {
+          this.$message("请随机分配陪审员");
+          return;
+        }
+        saveLawCaseJurors({
+          id: caseData.id,
+          jurors: caseData.jurors
+        }).then(({ data }) => {
+          this.$message(data.msg);
+        });
       });
     },
 
     onSave() {
-      const caseData = this.caseData;
-      if (caseData.status !== 1) {
-        this.$message("该案件已分配陪审员或已完结");
-        return;
-      }
-      if (caseData.jurors.length < 2) {
-        this.$message("请随机分配陪审员");
-        return;
-      }
-      saveLawCaseJurors({
-        id: caseData.id,
-        jurors: caseData.jurors
-      }).then(({ data }) => {
-        this.$message(data.msg);
-        this.caseData = {};
-        this.$emit("save");
-      });
+      this.$emit("save");
     },
 
     onOpenJuror(juror) {

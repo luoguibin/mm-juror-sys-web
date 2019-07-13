@@ -16,7 +16,7 @@
 
       <!-- 操作按钮插槽 -->
       <template #table-option="{data}">
-        <el-button type="text" v-if="authType >= 5" @click="onOpenEidtDialog(data)">编辑</el-button>
+        <el-button type="text" v-if="authType >= 5" @click="onOpenNewJuror(data)">编辑</el-button>
         <el-button type="text" v-if="authType >= 5" @click="onDelete(data)">删除</el-button>
         <template v-if="authType < 5">-</template>
       </template>
@@ -31,6 +31,16 @@
         @current-change="handlePageChange"
       ></el-pagination>
     </form-table>
+
+    <!-- 新增案件对话框 -->
+    <el-dialog :visible.sync="jurorVisible" :title="jurorData.id ? '编辑陪审员' : '新增陪审员'">
+      <form-table
+        :formProps="jurorProps"
+        :formData="jurorData"
+        :inline="false"
+        @confirm="handleConfirmCase"
+      ></form-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -38,7 +48,12 @@
 import Vue from "vue";
 import { mapGetters } from "vuex";
 import FormTable from "../../components/form-table";
-import { getJurors } from "../../http/api/juror-manage";
+import {
+  getJurors,
+  saveJuror,
+  deleteJuror,
+  getUndertakers
+} from "../../http/api/juror-manage";
 
 export default {
   name: "juror-manage",
@@ -54,7 +69,7 @@ export default {
           label: "ID",
           target: "number",
           placeholder: "请输入ID",
-          disabled: true
+          disabled: false
         },
         {
           prop: "orderType",
@@ -112,12 +127,50 @@ export default {
       tableTotal: 0,
       currentPage: 1,
 
-      orderType: 1
+      orderType: 1,
+
+      jurorVisible: false,
+      jurorProps: [
+        {
+          prop: "servantUnitId",
+          label: "单位",
+          labelWidth: "100px",
+          target: "select",
+          options: [],
+          call: (obj, option) => {
+            // servantUnitId
+          }
+        },
+        {
+          prop: "name",
+          label: "姓名",
+          labelWidth: "100px"
+        },
+        {
+          prop: "sex",
+          label: "性别",
+          labelWidth: "100px",
+          target: "select",
+          options: [{ value: 0, label: "女" }, { value: 1, label: "男" }]
+        },
+        {
+          prop: "phone",
+          label: "手机号码",
+          labelWidth: "100px",
+          target: "number"
+        },
+        {
+          prop: "address",
+          label: "住址",
+          labelWidth: "100px"
+        }
+      ],
+      jurorData: {}
     };
   },
 
   created() {
-    window.JurorManage = this;
+    window.jurorManage = this;
     this.getJurors();
   },
 
@@ -153,16 +206,62 @@ export default {
       console.log("onCaseCount", data, option);
     },
 
-    onOpenEidtDialog(info) {
-      this.$message("过阵子开放该功能");
-    },
-
     onDelete(info) {
-      this.$message("过阵子开放该功能");
+      this.$confirm("确定删除?", "系统提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消"
+      })
+        .then(() => {
+          deleteJuror({ id: info.id }).then(({ data }) => {
+            this.$message(data.msg);
+            this.getJurors();
+          });
+        })
+        .catch(() => {});
     },
 
-    onOpenNewJuror() {
-      this.$message("过阵子开放该功能");
+    onOpenNewJuror(data) {
+      this.jurorVisible = true;
+
+      getUndertakers().then(resp => {
+        const result = resp.data.data;
+        if (result) {
+          const { servantUnits } = result;
+          console.log(servantUnits);
+          const options = servantUnits.map(o => ({
+            value: o.id,
+            label: o.name
+          }));
+
+          this.jurorProps[0].options = options;
+
+          if (data) {
+            const juror = JSON.parse(JSON.stringify(data));
+            this.jurorData = juror;
+          } else {
+            this.jurorData = { sex: 1 };
+          }
+        }
+      });
+    },
+
+    handleConfirmCase(data) {
+      const keys = ["name", "phone", "servantUnitId"];
+      let count = 0;
+      keys.forEach(key => {
+        if (data[key]) {
+          count++;
+        }
+      });
+      if (keys.length === count) {
+        saveJuror(data).then(({ data }) => {
+          this.$message(data.msg);
+          this.jurorVisible = false;
+          this.getJurors();
+        });
+      } else {
+        this.$message("请输入数据");
+      }
     }
   }
 };
