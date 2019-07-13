@@ -109,19 +109,20 @@ export const getUserMenu = ({ authType }) => {
                 path: "home"
             },
             {
-                name: "juror-manage",
-                componentPath: "juror-manage/",
-                title: "陪审员信息",
-                path: "juror-manage",
-                parent: "home"
-            },
-            {
                 name: "case-manage",
                 componentPath: "case-manage/",
                 title: "案件管理",
                 path: "case-manage",
                 parent: "home"
-            }]
+            },
+            {
+                name: "juror-manage",
+                componentPath: "juror-manage/",
+                title: "陪审员信息",
+                path: "juror-manage",
+                parent: "home"
+            }
+        ]
     }
     return new Promise(function (resolve, reject) {
         if (authType >= 5) {

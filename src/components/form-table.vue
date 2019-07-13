@@ -8,12 +8,13 @@
         :key="item.prop"
         :prop="item.prop"
         :label="item.label"
-        :label-width="item.width || 'auto'"
+        :label-width="item.labelWidth || 'auto'"
       >
         <!-- 下拉选择 -->
         <el-select
           v-if="item.target === 'select'"
           v-model="formData[item.prop]"
+          :style="item.style"
           :placeholder="item.placeholder"
           :disabled="item.disabled"
           @change="onFormDataChange(item)"
@@ -26,10 +27,22 @@
           ></el-option>
         </el-select>
 
+        <!-- 级联选择 -->
+        <el-cascader
+          v-else-if="item.target === 'cascader'"
+          v-model="formData[item.prop]"
+          :style="item.style"
+          :placeholder="item.placeholder"
+          :disabled="item.disabled"
+          :options="item.options"
+          @change="onFormDataChange(item)"
+        ></el-cascader>
+
         <!-- 数字输入框 -->
         <el-input
           v-else-if="item.target === 'number'"
           v-model.number="formData[item.prop]"
+          :style="item.style"
           :disabled="item.disabled"
           :placeholder="item.placeholder"
         ></el-input>
@@ -43,6 +56,7 @@
         <el-input
           v-else
           v-model="formData[item.prop]"
+          :style="item.style"
           :disabled="item.disabled"
           :placeholder="item.placeholder"
         ></el-input>
@@ -76,7 +90,7 @@
             v-if="item.target === 'button'"
             :type="item.buttonType"
             @click="onTableDataClick(scope.row, item)"
-          >{{item.buttonText ? item.buttonText : scope.row[item.prop]}}</el-button>
+          >{{item.changeText ? item.changeText(scope.row, item.prop) : scope.row[item.prop]}}</el-button>
 
           <!-- span文本修饰 -->
           <span

@@ -25,9 +25,14 @@
 
       <!-- 操作按钮插槽 -->
       <template #table-option="{data}">
-        <el-button type="text" v-if="data.status == 1" @click="onDistribute(data)">分配</el-button>
-        <el-button type="text" @click="onOpenCaseDialog(data)">编辑</el-button>
+        <el-button
+          type="text"
+          v-if="authType >= 5 && data.status == 1"
+          @click="onDistribute(data)"
+        >分配</el-button>
+        <el-button type="text" v-if="authType >= 5" @click="onOpenCaseDialog(data)">编辑</el-button>
         <el-button type="text" v-if="authType >= 5" @click="onDelete(data)">删除</el-button>
+        <template v-if="authType < 5">-</template>
       </template>
 
       <el-pagination
@@ -47,13 +52,19 @@
     </el-dialog>
 
     <!-- 新增案件对话框 -->
-    <el-dialog :visible.sync="caseVisible" :title="caseData.id ? '编辑案件' : '新增案件'">
+    <el-dialog
+      class="case-title-dialog"
+      :visible.sync="caseVisible"
+      :title="caseData.id ? '编辑案件' : '新增案件'"
+    >
       <form-table
         :formProps="caseProps"
         :formData="caseData"
         :inline="false"
         @confirm="handleConfirmCase"
-      ></form-table>
+      >
+        <case-title slot="case-title" :caseData="caseData"></case-title>
+      </form-table>
     </el-dialog>
   </div>
 </template>
@@ -62,13 +73,18 @@
 import Vue from "vue";
 import { mapGetters } from "vuex";
 import FormTable from "../../components/form-table";
+import CaseTitle from "./case-title";
 import { getLawCases, saveLawCase } from "../../http/api/case-manage";
+import { getUndertakers } from "../../http/api/juror-manage";
+import { getUserList } from "../../http/api/user";
+
 import { CaseUtil } from "./config";
 
 export default {
   name: "case-manage",
   components: {
     FormTable,
+    CaseTitle,
     "random-panel": () => import("../../components/random-panel/index")
   },
   data() {
@@ -78,7 +94,7 @@ export default {
           prop: "id",
           label: "ID",
           target: "number",
-          disabled: true,
+          disabled: false,
           placeholder: "请输入ID"
         },
         {
@@ -107,15 +123,18 @@ export default {
           }
         },
         {
-          prop: "department",
+          prop: "servantUnit",
           label: "承办部门",
           changeText(obj, key) {
-            return CaseUtil.departmentMap[obj[key]];
+            return obj[key] ? obj[key].name : "-";
           }
         },
         {
           prop: "undertaker",
-          label: "承办人"
+          label: "承办人",
+          changeText(obj, key) {
+            return obj[key] ? obj[key].name : "-";
+          }
         },
         {
           prop: "status",
@@ -150,28 +169,26 @@ export default {
 
       caseVisible: false,
       caseProps: [
-        { prop: "caseYear", label: "年份", width: "100px", target: "number" },
         {
-          prop: "caseProvince",
-          label: "省份",
-          width: "100px",
-          target: "select",
-          options: CaseUtil.getCaseProvinces()
+          prop: "caseTitle",
+          label: "案号:",
+          labelWidth: "100px",
+          slot: "case-title"
         },
         {
-          prop: "caseType",
-          label: "案件类型",
-          width: "100px",
-          target: "select",
-          options: CaseUtil.getCaseTypes()
-        },
-        { prop: "caseCode", label: "编号", width: "100px", target: "number" },
-        {
-          prop: "department",
-          label: "承办部门",
-          width: "100px",
-          target: "select",
-          options: CaseUtil.getDepartments()
+          prop: "undertakerIds",
+          label: "承办人:",
+          labelWidth: "100px",
+          target: "cascader",
+          options: [],
+          call: (obj, option) => {
+            if (obj.undertakerIds && obj.undertakerIds.length) {
+              obj.servantUnitId = obj.undertakerIds[0];
+              if (obj.undertakerIds.length > 1) {
+                obj.undertakerId = obj.undertakerIds[1];
+              }
+            }
+          }
         }
       ],
       caseData: {}
@@ -198,11 +215,22 @@ export default {
     },
 
     handleConfirmCase(data) {
-      saveLawCase(data).then(({ data }) => {
-        this.$message(data.msg);
-        this.caseVisible = false;
-        this.getLawCases();
+      const keys = ["caseYear", "caseType", "caseCode", "undertaker"];
+      let count = 0;
+      keys.forEach(key => {
+        if (data[key]) {
+          count++;
+        }
       });
+      if (keys.length === count) {
+        saveLawCase(data).then(({ data }) => {
+          this.$message(data.msg);
+          this.caseVisible = false;
+          this.getLawCases();
+        });
+      } else {
+        this.$message("请输入数据");
+      }
     },
 
     handleRandomSave() {
@@ -236,9 +264,55 @@ export default {
      */
     onOpenCaseDialog(data) {
       this.caseVisible = true;
-      this.caseData = data
-        ? JSON.parse(JSON.stringify(data))
-        : { caseYear: new Date().getFullYear() };
+      getUndertakers().then(resp => {
+        const result = resp.data.data;
+        if (result) {
+          // 处理级联配置数据
+          const directChildren = [];
+          const { servantUnits, undertakers } = result,
+            options = [];
+          const tempObj = {};
+          servantUnits.forEach(o => {
+            tempObj[o.id] = {
+              value: o.id,
+              label: o.name,
+              children: o.direct === 2 ? directChildren : [] // 合并direct=1的数据
+            };
+          });
+
+          undertakers.forEach(o => {
+            if (tempObj[o.servantUnitId]) {
+              const children = tempObj[o.servantUnitId].children;
+              children.push({
+                value: o.id,
+                label: o.name
+              });
+            } else {
+              console.log("match undertakers error", o);
+            }
+          });
+
+          Object.keys(tempObj).forEach(key => {
+            options.push(tempObj[key]);
+          });
+
+          this.caseProps[1].options = options;
+
+          if (data) {
+            const lawCase = JSON.parse(JSON.stringify(data));
+            lawCase.undertakerIds = [
+              lawCase.servantUnitId,
+              lawCase.undertakerId
+            ];
+            this.caseData = lawCase;
+          } else {
+            this.caseData = {
+              caseYear: new Date().getFullYear(),
+              caseProvince: 440000
+            };
+          }
+        }
+      });
     },
 
     onDelete(info) {
@@ -262,6 +336,10 @@ export default {
 .case-manage {
   .el-dialog {
     min-width: 700px;
+  }
+
+  .case-title-dialog .el-dialog {
+    max-width: 700px;
   }
 
   #{&}_status {

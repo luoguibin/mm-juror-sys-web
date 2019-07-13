@@ -119,6 +119,18 @@ export default {
       tableColumns: [
         { prop: "id", label: "ID" },
         { prop: "name", label: "名称" },
+        // {
+        //   prop: "jurorId",
+        //   label: "是否关联职务",
+        //   target: "button",
+        //   buttonType: "text",
+        //   changeText(obj, key) {
+        //     return obj[key] ? "是" : "否";
+        //   },
+        //   call: (obj, key) => {
+        //     console.log(obj);
+        //   }
+        // },
         {
           prop: "authType",
           label: "账号类型",

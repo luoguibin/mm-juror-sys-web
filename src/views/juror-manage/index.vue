@@ -16,8 +16,9 @@
 
       <!-- 操作按钮插槽 -->
       <template #table-option="{data}">
-        <el-button type="text" @click="onOpenEidtDialog(data)">编辑</el-button>
+        <el-button type="text" v-if="authType >= 5" @click="onOpenEidtDialog(data)">编辑</el-button>
         <el-button type="text" v-if="authType >= 5" @click="onDelete(data)">删除</el-button>
+        <template v-if="authType < 5">-</template>
       </template>
 
       <el-pagination
@@ -48,7 +49,13 @@ export default {
   data() {
     return {
       formProps: [
-        { prop: "id", label: "ID", target: "number", placeholder: "请输入ID", disabled: true },
+        {
+          prop: "id",
+          label: "ID",
+          target: "number",
+          placeholder: "请输入ID",
+          disabled: true
+        },
         {
           prop: "orderType",
           label: "案件数排序",
@@ -70,11 +77,17 @@ export default {
         {
           prop: "sex",
           label: "性别",
-          changeText(target, key) {
-            return target[key] ? "男" : "女";
+          changeText(obj, key) {
+            return obj[key] ? "男" : "女";
           }
         },
-        { prop: "company", label: "工作单位" },
+        {
+          prop: "servantUnit",
+          label: "工作单位",
+          changeText(obj, key) {
+            return obj[key].name;
+          }
+        },
         {
           prop: "caseCount",
           label: "已陪审案件数",
@@ -87,8 +100,8 @@ export default {
         {
           prop: "timeCreate",
           label: "创建时间",
-          changeText(target, key) {
-            return Vue.filter("time-filter")(target[key]);
+          changeText(obj, key) {
+            return Vue.filter("time-filter")(obj[key]);
           }
         },
         { prop: "table-option", label: "操作", slot: "table-option" }
