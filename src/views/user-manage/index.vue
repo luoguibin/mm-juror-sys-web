@@ -9,7 +9,7 @@
       confirmText="搜索"
       @confirm="handleConfirm"
     >
-      <template slot="form-end">
+      <template v-if="authType >= 9" slot="form-end">
         <el-divider direction="vertical"></el-divider>
         <el-button @click="onOpenDialog()" type="primary">新增用户</el-button>
       </template>

@@ -5,6 +5,7 @@
       <!-- 常规选项 -->
       <el-form-item
         v-for="item in formProps"
+        v-show="!item.hidden"
         :key="item.prop"
         :prop="item.prop"
         :label="item.label"
@@ -47,10 +48,18 @@
           :placeholder="item.placeholder"
         ></el-input>
 
+        <!-- 开关 -->
+        <el-switch
+          v-else-if="item.target === 'switch'"
+          v-model="formData[item.prop]"
+          :active-text="item.activeText"
+          :inactive-text="item.inactiveText"
+        ></el-switch>
+
         <!-- span文本显示 -->
         <span v-else-if="item.target === 'span'">{{formData[item.prop]}}</span>
 
-        <slot v-else-if="item.slot" :name="item.slot"></slot>
+        <slot v-else-if="item.slot" :name="item.slot" :data="formData"></slot>
 
         <!-- 常规字符输入框 -->
         <el-input

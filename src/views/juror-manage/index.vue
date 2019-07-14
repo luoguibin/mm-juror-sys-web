@@ -9,7 +9,7 @@
       confirmText="搜索"
       @confirm="handleConfirm"
     >
-      <template slot="form-end">
+      <template v-if="authType >= 5" slot="form-end">
         <el-divider direction="vertical"></el-divider>
         <el-button @click="onOpenNewJuror()" type="primary">新增陪审员</el-button>
       </template>
@@ -160,6 +160,16 @@ export default {
           target: "number"
         },
         {
+          prop: "jurorType",
+          label: "角色",
+          labelWidth: "100px",
+          target: "select",
+          options: [
+            { value: 0, label: "陪审员" },
+            { value: 1, label: "承办人" }
+          ]
+        },
+        {
           prop: "address",
           label: "住址",
           labelWidth: "100px"
@@ -171,6 +181,9 @@ export default {
 
   created() {
     window.jurorManage = this;
+  },
+
+  activated() {
     this.getJurors();
   },
 
@@ -239,7 +252,7 @@ export default {
             const juror = JSON.parse(JSON.stringify(data));
             this.jurorData = juror;
           } else {
-            this.jurorData = { sex: 1 };
+            this.jurorData = { sex: 1, jurorType: 0 };
           }
         }
       });

@@ -6,6 +6,7 @@ export const loginByAccount = data => {
         const user = apiData.users.find(o => {
             return o.id === data.id;
         })
+        console.log(user, data)
         if (user && user.pw === data.pw) {
             resolve({
                 data: {
@@ -150,7 +151,7 @@ export const getUserList = params => {
             }
             resolve({
                 data: {
-                    data: user ? [user] : [],
+                    data: user ? JSON.parse(JSON.stringify([user])) : [],
                     total: user ? 1 : 0,
                     code: user ? 1000 : 1001,
                     msg: user ? "获取成功" : "获取失败"
@@ -176,7 +177,7 @@ export const getUserList = params => {
         }
         resolve({
             data: {
-                data: temp.slice(start, start + limit),
+                data: JSON.parse(JSON.stringify(temp.slice(start, start + limit))),
                 total: temp.length,
                 code: 1000,
                 msg: "获取成功"

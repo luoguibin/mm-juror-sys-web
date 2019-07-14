@@ -14,7 +14,7 @@ export const getJurors = params => {
                 data: {
                     code: juror ? 1000 : 1001,
                     msg: juror ? "查询成功" : "查询失败",
-                    data: juror ? [juror] : []
+                    data: juror ? JSON.parse(JSON.stringify([juror])) : []
                 }
             })
             return;
@@ -34,7 +34,7 @@ export const getJurors = params => {
                     code: 1000,
                     msg: "获取成功",
                     total: temp.length,
-                    data: result
+                    data: JSON.parse(JSON.stringify(result))
                 }
             })
         } else {
@@ -57,22 +57,22 @@ export const getJurors = params => {
                     code: 1000,
                     msg: "获取成功",
                     total: tempJurors.length,
-                    data: result
+                    data: JSON.parse(JSON.stringify(result))
                 }
             })
         }
     })
 }
 
-export const getLowJurors = data => {
+export const getLowJurors = params => {
     return new Promise(function (resolve, reject) {
-        const result = apiData.getLowJurors(),
+        const result = apiData.getLowJurors(params),
             flag = result.length;
         resolve({
             data: {
                 code: flag ? 1000 : 1001,
                 msg: flag ? "获取成功" : "获取失败",
-                data: result
+                data: JSON.parse(JSON.stringify(result))
             }
         })
     })
@@ -84,8 +84,8 @@ export const getUndertakers = params => {
             data: {
                 code: 1000,
                 data: {
-                    undertakers: apiData.undertakers,
-                    servantUnits: apiData.servantUnits
+                    undertakers: JSON.parse(JSON.stringify(apiData.undertakers)),
+                    servantUnits: JSON.parse(JSON.stringify(apiData.servantUnits))
                 },
                 msg: "获取成功"
             }

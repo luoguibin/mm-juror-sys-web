@@ -90,11 +90,12 @@ export default {
          */
         logout(context) {
             logoutAccount().finally(() => {
-                localStorage.removeItem("gd-job-userinfo");
+                localStorage.removeItem("mm-juror-userinfo");
                 sessionStorage.clear();
                 context.commit("setUserInfo");
                 context.commit("setUserMenu");
-                window.location.reload();
+                router.push({name: "login"})
+                // window.location.reload();
             });
         },
 

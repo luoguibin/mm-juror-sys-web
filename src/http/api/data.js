@@ -155,9 +155,9 @@ const apiData = {
     ],
 
     statuses: [
-        { id: 101, name: "可审办" },
+        { id: 101, name: "未分配" },
         { id: 102, name: "已分配" },
-        { id: 103, name: "已完结" }
+        // { id: 103, name: "已完结" }
     ]
 }
 
@@ -201,7 +201,7 @@ apiData.statusIds = (function () {
 // @csentence(100, 500)
 
 const mockData = Mock.mock({
-    "users|20-49": [{
+    "users|2-5": [{
         "id|+1": 15610001000,
         "pw": "123456",
         "name": "@cname",
@@ -209,17 +209,18 @@ const mockData = Mock.mock({
         "jurorId": 0,
         "timeCreate": apiData.currentTime
     }],
-    "jurors|208": [{
+    "jurors|5": [{
         "id|+1": 10001000,
         "name": "@cname",
         "sex|1": [0, 1],
         "phone": 15600000001,
         "servantUnitId|1": apiData.servantUnitIds,
+        "jurorType": 0,
         "address": "",
         "caseCount": 0,
         "timeCreate": apiData.currentTime
     }],
-    "lawCases|188": [{
+    "lawCases|3": [{
         "id|+1": 20001000,
         "caseYear|1": [2018, 2019],
         "caseProvince|1": apiData.caseProvinceIds,
@@ -242,12 +243,14 @@ for (const key in mockData) {
 console.log(apiData)
 
 // 承办人
-apiData.undertakers = apiData.jurors.splice(apiData.jurors.length - 61, 60);
+const count = Math.floor(apiData.jurors.length * 0.3) || 1;
+apiData.undertakers = apiData.jurors.splice(0, count);
 apiData.findUndertaker = function (id) {
     return this.undertakers.find(o => o.id === id);
 };
 (function () {
     apiData.undertakers.forEach((o, index) => {
+        o.jurorType = 1;
         o.servantUnitId = apiData.servantUnits[index % apiData.servantUnitIds.length].id;
     })
 })();
@@ -258,7 +261,9 @@ apiData.findUndertaker = function (id) {
         if (Math.random() < 0.05 || index < 1) {
             user.authType = 5;
         }
-        user.jurorId = apiData.jurors[index].id;
+        if (apiData.jurors[index]) {
+            user.jurorId = apiData.jurors[index].id;
+        }
     });
     apiData.users[1].authType = 1;
 
@@ -283,7 +288,7 @@ apiData.addUser = function (user) {
         return null;
     }
     user.authType = user.authType || 1;
-    user.jurorId = 0;
+    user.jurorId = user.jurorId || 0;
     user.timeCreate = new Date().getTime();
     this.users.push(user);
     return user;
@@ -297,6 +302,7 @@ apiData.updateUser = function (user) {
         target.name = user.name || target.name;
         target.pw = user.pw || target.pw;
         target.authType = user.authType || target.authType;
+        target.address = user.adddress || target.adddress;
         return true;
     }
     return false;
@@ -323,8 +329,8 @@ apiData.deleteUser = function (user) {
     });
 })();
 
-apiData.getLowJurors = function () {
-    const tempJurors = this.jurors.filter(o => true);
+apiData.getLowJurors = function (params) {
+    const tempJurors = this.jurors.filter(o => o.servantUnitId === params.servantUnitId);
 
     tempJurors.sort(function (a, b) {
         return a.caseCount > b.caseCount ? 1 : -1;
@@ -339,11 +345,28 @@ apiData.saveJuror = function (data) {
     }
     if (data.id) {
         // 保存
-        const juror = this.jurors.find(o => o.id === data.id);
+        let juror = this.jurors.find(o => o.id === data.id);
+        let originIsJuror = true;
+        if (!juror) {
+            juror = this.undertakers.find(o => o.id === data.id);
+            originIsJuror = false;
+        }
         if (juror) {
+            const isSwap = juror.jurorType !== data.jurorType;
             for (const key in juror) {
                 if (juror.hasOwnProperty(key)) {
                     juror[key] = data[key];
+                }
+            }
+            if (isSwap) {
+                if (originIsJuror) {
+                    const index = this.jurors.find(o => o.id === juror.id);
+                    const obj = this.jurors.splice(index, 1)[0];
+                    this.undertakers.push(obj);
+                } else {
+                    const index = this.undertakers.find(o => o.id === juror.id);
+                    const obj = this.undertakers.splice(index, 1)[0];
+                    this.jurors.push(obj);
                 }
             }
         } else {
@@ -352,19 +375,23 @@ apiData.saveJuror = function (data) {
     } else {
         // 新增
         const obj = JSON.parse(JSON.stringify(data));
-        obj.id = this.jurors[this.jurors.length - 1].id + 1;
 
-        // "name": "@cname",
-        // "sex": [0, 1],
-        // "phone": 15600000001,
-        // "servantUnitId",
-        // "address": "",
+        const user = this.addUser({ id: obj.phone, pw: "123456", name: obj.name });
+        if (!user) {
+            return false;
+        }
+
+        obj.id = this.jurors[this.jurors.length - 1].id + 1;
         obj.caseCount = 0;
 
         const time = new Date().getTime();
         obj.timeCreate = time;
 
-        this.jurors.push(obj);
+        if (obj.jurorType) {
+            this.undertakers.push(obj);
+        } else {
+            this.jurors.push(obj);
+        }
     }
     return true;
 };
@@ -386,13 +413,14 @@ apiData.saveJuror = function (data) {
                 return o.servantUnitId === undertaker.servantUnitId;
             })
             const jurorLength = tempJurors.length;
+            if (!jurorLength) { return; }
             // 第一个陪审员
             const index = Math.floor(Math.random() * jurorLength);
             lawCase.jurors.push({
                 id: tempJurors[index].id,
                 name: tempJurors[index].name,
             })
-            lawCase.status = Math.random() < 0.8 ? apiData.statuses[2].id : apiData.statuses[1].id;
+            lawCase.status = apiData.statuses[1].id;
             tempJurors[index].caseCount++;
 
             // 第二个陪审员
@@ -430,50 +458,44 @@ apiData.getLawCase = function (params) {
     }
 }
 
-apiData.saveCaseJurors = function (data) {
-    if (!data.id || !data.jurors || !data.jurors.length) {
-        return false;
-    }
-    const lawCase = this.lawCases.find(o => {
-        return o.id === data.id;
-    });
-    if (!lawCase) {
-        return false;
-    }
-
-    const tempJurors = [];
-    data.jurors.forEach(o => {
-        const juror = this.jurors.find(o_ => {
-            return o_.id === o.id;
-        });
-        if (juror) {
-            tempJurors.push(juror);
-        }
-    })
-    const flag = tempJurors.length && tempJurors.length === data.jurors.length;
-    if (flag) {
-        lawCase.jurors = data.jurors;
-        lawCase.status = apiData.statuses[1].id;
-        tempJurors.forEach(o => {
-            o.caseCount++;
-        });
-    }
-    return flag;
-}
-
 apiData.saveLawCase = function (data) {
     if (!data) {
         return false;
     }
+    data = JSON.parse(JSON.stringify(data));
     if (data.id) {
         // 保存
         const lawCase = this.lawCases.find(o => o.id === data.id);
         if (lawCase) {
-            console.log(lawCase, data)
+            // 清空当前陪审员
+            lawCase.jurors.forEach(o => {
+                const juror = this.jurors.find(o_ => o_.id === o.id);
+                if (juror) {
+                    juror.caseCount--;
+                }
+            });
+            // 设置新值
+            console.log(lawCase.jurors, data.jurors)
+
             for (const key in lawCase) {
                 if (lawCase.hasOwnProperty(key)) {
                     lawCase[key] = data[key];
                 }
+            }
+            lawCase.status = this.statuses[0].id;
+
+            // 判断重新设置陪审员
+            if (data.jurors) {
+                if (data.jurors.length) {
+                    lawCase.status++;
+                }
+                data.jurors.forEach(o => {
+                    const juror = this.jurors.find(o_ => o_.id === o.id);
+                    console.log(juror)
+                    if (juror) {
+                        juror.caseCount++;
+                    }
+                });
             }
         } else {
             return false;
@@ -483,7 +505,17 @@ apiData.saveLawCase = function (data) {
         const obj = JSON.parse(JSON.stringify(data));
         obj.id = this.lawCases[this.lawCases.length - 1].id + 1;
         obj.status = apiData.statuses[0].id;
-        obj.jurors = [];
+        if (obj.jurors && obj.jurors.length) {
+            obj.status++;
+            obj.jurors.forEach(jurorId => {
+                const juror = this.jurors.find(o => o.id === jurorId);
+                if (juror) {
+                    juror.caseCount++;
+                }
+            });
+        } else {
+            obj.jurors = [];
+        }
 
         const time = new Date().getTime();
         obj.timeUpdate = time;

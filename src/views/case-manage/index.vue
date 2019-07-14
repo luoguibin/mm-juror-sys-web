@@ -9,7 +9,7 @@
       confirmText="搜索"
       @confirm="handleConfirm"
     >
-      <template slot="form-end">
+      <template v-if="authType >= 5" slot="form-end">
         <el-divider direction="vertical"></el-divider>
         <el-button @click="onOpenCaseDialog()" type="primary">新增案件</el-button>
       </template>
@@ -28,10 +28,10 @@
         <el-button
           type="text"
           v-if="authType >= 5 && data.status === randomStatus"
-          @click="onDistribute(data)"
+          @click="onRandomJurors(data)"
         >分配</el-button>
-        <el-button type="text" v-if="authType >= 5" @click="onOpenCaseDialog(data)">编辑</el-button>
-        <el-button type="text" v-if="authType >= 5" @click="onDelete(data)">删除</el-button>
+        <el-button v-if="authType >= 5" type="text" @click="onOpenCaseDialog(data)">编辑</el-button>
+        <el-button v-if="authType >= 5" type="text" @click="onDelete(data)">删除</el-button>
         <template v-if="authType < 5">-</template>
       </template>
 
@@ -46,12 +46,7 @@
       ></el-pagination>
     </form-table>
 
-    <!-- 陪审员分配对话框 -->
-    <el-dialog :visible.sync="randomVisible" title="陪审员分配">
-      <random-panel :lawCase="randomCase" @save="handleRandomSave"></random-panel>
-    </el-dialog>
-
-    <!-- 新增案件对话框 -->
+    <!-- 陪审员分配，新增或编辑案件对话框 -->
     <el-dialog
       class="case-title-dialog"
       :visible.sync="caseVisible"
@@ -61,8 +56,26 @@
         :formProps="caseProps"
         :formData="caseData"
         :inline="false"
+        confirmText="保存"
         @confirm="handleConfirmCase"
       >
+        <template #random-panel="{data}">
+          <el-tag
+            v-for="juror in data.jurors"
+            :key="juror.id"
+            closable
+            @close="onCloseJurorTag(juror)"
+            @click="onOpenJuror(juror)"
+          >{{juror.name}}</el-tag>
+
+          <el-divider v-if="data.jurors && data.jurors.length > 0" direction="vertical"></el-divider>
+          <el-button
+            :disabled="data.jurors && data.jurors.length >= 2"
+            type="primary"
+            @click="getLowJurors()"
+          >随机分配</el-button>
+          <el-button type="primary" @click="onOpenRandomJurors">手动分配</el-button>
+        </template>
         <case-title slot="case-title" :caseData="caseData"></case-title>
       </form-table>
     </el-dialog>
@@ -80,7 +93,7 @@ import {
   deleteLawCase,
   getCaseConfig
 } from "../../http/api/case-manage";
-import { getUndertakers } from "../../http/api/juror-manage";
+import { getLowJurors, getUndertakers } from "../../http/api/juror-manage";
 import { getUserList } from "../../http/api/user";
 
 import { CaseUtil } from "./config";
@@ -89,8 +102,7 @@ export default {
   name: "case-manage",
   components: {
     FormTable,
-    CaseTitle,
-    "random-panel": () => import("../../components/random-panel/index")
+    CaseTitle
   },
   data() {
     return {
@@ -167,10 +179,7 @@ export default {
       currentStatus: 0,
       currentPage: 1,
 
-      randomVisible: false,
       randomStatus: 0,
-      randomCase: null,
-
       caseVisible: false,
       caseProps: [
         {
@@ -190,9 +199,20 @@ export default {
               obj.servantUnitId = obj.undertakerIds[0];
               if (obj.undertakerIds.length > 1) {
                 obj.undertakerId = obj.undertakerIds[1];
+
+                // 新建案件重新获设置陪审员
+                obj.jurors = [];
+                this.caseProps[2].hidden = false;
               }
             }
           }
+        },
+        {
+          prop: "random-panel",
+          label: "陪审员",
+          hidden: false,
+          slot: "random-panel",
+          labelWidth: "100px"
         }
       ],
       caseData: {}
@@ -245,18 +265,14 @@ export default {
         }
       });
       if (keys.length === count) {
-        saveLawCase(data).then(({ data }) => {
-          this.$message(data.msg);
-          this.caseVisible = false;
-          this.getLawCases();
-        });
+        this.saveLawCase(data, true);
       } else {
         this.$message("请输入数据");
       }
     },
 
     handleRandomSave() {
-      this.randomVisible = false;
+      this.caseVisible = false;
       this.currentStatus = 1;
       this.getLawCases();
     },
@@ -273,19 +289,14 @@ export default {
         });
     },
 
-    onDistribute(info) {
-      this.randomVisible = true;
-      const lawCase = JSON.parse(JSON.stringify(info));
-      lawCase.title = CaseUtil.makeTitle(lawCase);
-      this.randomCase = lawCase;
-    },
-
     /**
-     * 新建或编辑案件
+     * 分配，新建或编辑案件
      * @param {Object} data
      */
     onOpenCaseDialog(data) {
       this.caseVisible = true;
+      this.caseProps[2].hidden = !data;
+
       getUndertakers().then(resp => {
         const result = resp.data.data;
         if (result) {
@@ -351,6 +362,55 @@ export default {
         .catch(() => {});
     },
 
+    /**
+     * 直接点击表格操作的分配按钮
+     */
+    onRandomJurors(data) {
+      this.caseData = data;
+      this.getLowJurors();
+    },
+
+    getLowJurors() {
+      getLowJurors({
+        servantUnitId: this.caseData.servantUnitId
+      }).then(({ data }) => {
+        const caseData = this.caseData;
+        caseData.jurors = data.data;
+
+        this.$forceUpdate();
+
+        // 已创建的案件中，随机分配后自动保存
+        if (caseData.id) {
+          if (!caseData.jurors.length) {
+            this.$message("该单位下未添加陪审员信息，或手动选择，或添加陪审员");
+            return;
+          }
+          this.saveLawCase(caseData, false, true);
+        }
+      });
+    },
+
+    saveLawCase(data, closeDialog, randomDirect) {
+      saveLawCase(data).then(resp => {
+        this.$message(randomDirect ? "分配成功" : resp.data.msg);
+        if (closeDialog) {
+          this.caseVisible = false;
+        } 
+        this.getLawCases();
+      });
+    },
+
+    onOpenRandomJurors() {
+      this.$message("过阵子开放该功能");
+    },
+
+    onCloseJurorTag(juror) {
+      const jurors = this.caseData.jurors;
+      const index = jurors.findIndex(o => o.id === juror.id);
+      jurors.splice(index, 1);
+      this.$forceUpdate();
+    },
+
     onOpenJuror(info) {
       console.log("onOpenJuror", info);
       this.$message("过阵子开放该功能");
@@ -361,6 +421,9 @@ export default {
 
 <style lang="scss" scoped>
 .case-manage {
+  .el-tag {
+    margin-right: 10px;
+  }
 }
 </style>
 

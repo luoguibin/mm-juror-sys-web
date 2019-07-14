@@ -18,7 +18,7 @@ export const getLawCases = params => {
                 data: {
                     code: lawCase ? 1000 : 1001,
                     msg: lawCase ? "查询成功" : "查询失败",
-                    data: lawCase ? [lawCase] : []
+                    data: lawCase ? JSON.parse(JSON.stringify([lawCase])) : []
                 }
             })
             return;
@@ -37,7 +37,7 @@ export const getLawCases = params => {
                     code: 1000,
                     msg: "获取成功",
                     total: apiData.lawCases.length,
-                    data: result
+                    data: JSON.parse(JSON.stringify(result))
                 }
             })
         } else {
@@ -51,7 +51,7 @@ export const getLawCases = params => {
                     code: 1000,
                     msg: "获取成功",
                     total: tempDatas.length,
-                    data: result
+                    data: JSON.parse(JSON.stringify(result))
                 }
             })
         }
@@ -65,7 +65,7 @@ export const getLawCase = params => {
             data: {
                 code: lawCase ? 1000 : 1001,
                 msg: lawCase ? "查询成功" : "未查询到对应数据",
-                data: lawCase
+                data: JSON.parse(JSON.stringify(lawCase))
             }
         })
     })
@@ -75,24 +75,20 @@ export const deleteLawCase = params => {
     return new Promise(function (resolve, reject) {
         const index = apiData.lawCases.findIndex(o => o.id === params.id);
         if (index >= 0) {
+            const lawCase = apiData.lawCases[index];
+            lawCase.jurors.forEach(o => {
+                const juror = apiData.jurors.find(o_ => o_.id === o.id);
+                if (juror) {
+                    juror.caseCount--;
+                }
+            });
+
             apiData.lawCases.splice(index, 1);
         }
         resolve({
             data: {
                 code: index >= 0 ? 1000 : 1001,
                 msg: index >= 0 ? "删除成功" : "删除失败"
-            }
-        })
-    })
-}
-
-export const saveLawCaseJurors = params => {
-    return new Promise(function (resolve, reject) {
-        const flag = apiData.saveCaseJurors(params);
-        resolve({
-            data: {
-                code: flag ? 1000 : 1001,
-                msg: flag ? "保存成功" : "保存失败"
             }
         })
     })
