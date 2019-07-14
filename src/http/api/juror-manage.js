@@ -119,3 +119,20 @@ export const saveJuror = data => {
         })
     })
 }
+
+export const getCityJurors = params => {
+    return new Promise(function (resolve, reject) {
+        const result = apiData.jurors.filter(o => {
+            const prefix = ("" + o.servantUnitId).substring(0, 4);
+            const cityId = +prefix;
+            return cityId === params.cityId;
+        })
+        resolve({
+            data: {
+                code: 1000,
+                data: result,
+                msg: "获取成功"
+            }
+        })
+    })
+}

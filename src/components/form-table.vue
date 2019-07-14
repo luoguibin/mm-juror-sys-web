@@ -9,6 +9,7 @@
         :key="item.prop"
         :prop="item.prop"
         :label="item.label"
+        :style="item.style || {}"
         :label-width="item.labelWidth || 'auto'"
       >
         <!-- 下拉选择 -->

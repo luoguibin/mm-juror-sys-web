@@ -74,8 +74,20 @@
             type="primary"
             @click="getLowJurors()"
           >随机分配</el-button>
-          <el-button type="primary" @click="onOpenRandomJurors">手动分配</el-button>
+
+          <div style="display: inline-block; position: relative; margin-left: 10px;">
+            <el-button type="primary" @click="onOpenRandomJurors">手动分配</el-button>
+            <el-cascader
+              ref="selfCascader"
+              style="position: absolute; height: 40px; overflow: hidden; left: 0; z-index: -1;"
+              v-model="selfValues"
+              :options="selfOptions"
+              :props="{ multiple: true, checkStrictly: false }"
+              @change="onSelfCascaderChange"
+            ></el-cascader>
+          </div>
         </template>
+
         <case-title slot="case-title" :caseData="caseData"></case-title>
       </form-table>
     </el-dialog>
@@ -93,7 +105,11 @@ import {
   deleteLawCase,
   getCaseConfig
 } from "../../http/api/case-manage";
-import { getLowJurors, getUndertakers } from "../../http/api/juror-manage";
+import {
+  getLowJurors,
+  getCityJurors,
+  getUndertakers
+} from "../../http/api/juror-manage";
 import { getUserList } from "../../http/api/user";
 
 import { CaseUtil } from "./config";
@@ -201,7 +217,9 @@ export default {
                 obj.undertakerId = obj.undertakerIds[1];
 
                 // 新建案件重新获设置陪审员
-                obj.jurors = [];
+                if (!obj.jurors || !obj.jurors.length) {
+                  obj.jurors = [];
+                }
                 this.caseProps[2].hidden = false;
               }
             }
@@ -215,7 +233,10 @@ export default {
           labelWidth: "100px"
         }
       ],
-      caseData: {}
+      caseData: {},
+
+      selfOptions: [],
+      selfValues: []
     };
   },
 
@@ -395,13 +416,72 @@ export default {
         this.$message(randomDirect ? "分配成功" : resp.data.msg);
         if (closeDialog) {
           this.caseVisible = false;
-        } 
+        }
         this.getLawCases();
       });
     },
 
     onOpenRandomJurors() {
-      this.$message("过阵子开放该功能");
+      getCityJurors({ cityId: 1020 }).then(({ data }) => {
+        const options = [],
+          optionMap = {},
+          jurors = data.data,
+          selfValues = [],
+          caseJurors = this.caseData.jurors || [];
+        CaseUtil.cityJurors = jurors;
+
+        jurors.forEach(juror => {
+          if (!optionMap[juror.servantUnitId]) {
+            optionMap[juror.servantUnitId] = {
+              value: juror.servantUnitId,
+              label: CaseUtil.servantUnitMap[[juror.servantUnitId]],
+              children: []
+            };
+          }
+          optionMap[juror.servantUnitId].children.push({
+            value: juror.id,
+            label: juror.name
+          });
+
+          caseJurors.forEach(o => {
+            if (o.id === juror.id) {
+              selfValues.push([o.servantUnitId, o.id]);
+            }
+          });
+        });
+
+        Object.keys(optionMap).forEach(key => {
+          options.push(optionMap[key]);
+        });
+
+        this.selfOptions = options;
+        this.selfValues = selfValues;
+
+        setTimeout(() => {
+          this.$refs.selfCascader.$el.click();
+        }, 100);
+      });
+    },
+
+    onSelfCascaderChange(values) {
+      if (values.length > 2) {
+        this.$message("最多选两个陪审员");
+
+        const temps = JSON.parse(JSON.stringify(values));
+        while (temps.length > 2) {
+          temps.shift();
+        }
+        this.selfValues = temps;
+      }
+
+      const jurors = [];
+      this.selfValues.forEach(vals => {
+        const juror = CaseUtil.cityJurors.find(o => o.id === vals[1]);
+        if (juror) {
+          jurors.push(juror);
+        }
+      });
+      this.caseData.jurors = jurors;
     },
 
     onCloseJurorTag(juror) {

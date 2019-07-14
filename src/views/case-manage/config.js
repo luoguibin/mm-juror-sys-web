@@ -12,6 +12,8 @@ export const CaseUtil = {
     servantUnits: [],
     servantUnitMap: {},
 
+    cityJurors: [],
+
     resetMap() {
         this.caseProvinces.forEach(o => {
             this.caseProvinceMap[o.id] = o.name;

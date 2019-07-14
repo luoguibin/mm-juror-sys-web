@@ -1,7 +1,7 @@
 <template>
   <div class="user-manage">
-    <xml-test></xml-test>
-    
+    <!-- <xml-test></xml-test> -->
+
     <form-table
       :formProps="formProps"
       :formData="formData"
