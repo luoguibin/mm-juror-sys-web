@@ -1,5 +1,7 @@
 <template>
   <div class="user-manage">
+    <xml-test></xml-test>
+    
     <form-table
       :formProps="formProps"
       :formData="formData"
@@ -87,7 +89,8 @@ import {
 export default {
   name: "user-manage",
   components: {
-    FormTable
+    FormTable,
+    "xml-test": () => import("./xml-test")
   },
   data() {
     return {
