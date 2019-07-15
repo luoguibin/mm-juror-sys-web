@@ -9,8 +9,8 @@
         :key="item.prop"
         :prop="item.prop"
         :label="item.label"
-        :style="item.style || {}"
-        :label-width="item.labelWidth || 'auto'"
+        :style="item.style"
+        :label-width="item.labelWidth"
       >
         <!-- 下拉选择 -->
         <el-select

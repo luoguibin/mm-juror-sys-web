@@ -109,29 +109,38 @@ export const getUserMenu = ({ authType }) => {
                 title: "首页",
                 path: "home"
             },
-            {
-                name: "case-manage",
-                componentPath: "case-manage/",
-                title: "案件管理",
-                path: "case-manage",
-                parent: "home"
-            },
-            {
-                name: "juror-manage",
-                componentPath: "juror-manage/",
-                title: "陪审员信息",
-                path: "juror-manage",
-                parent: "home"
-            }
+
         ]
     }
     return new Promise(function (resolve, reject) {
         if (authType >= 5) {
             menu.routers.push({
+                name: "case-manage",
+                componentPath: "case-manage/",
+                title: "案件管理",
+                path: "case-manage",
+                parent: "home"
+            });
+            menu.routers.push({
+                name: "juror-manage",
+                componentPath: "juror-manage/",
+                title: "陪审员信息",
+                path: "juror-manage",
+                parent: "home"
+            });
+            menu.routers.push({
                 name: "user-manage",
                 componentPath: "user-manage/",
                 path: "user-manage",
                 title: "用户管理",
+                parent: "home"
+            })
+        } else {
+            menu.routers.push({
+                name: "user-case",
+                componentPath: "user-case/",
+                path: "user-case",
+                title: "我的案件",
                 parent: "home"
             })
         }

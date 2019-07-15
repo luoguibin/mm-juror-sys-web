@@ -100,14 +100,14 @@ export default {
     },
 
     onLogout() {
-      this.$confirm("用户退出后所有数据将重置?", "系统提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消"
-      })
-        .then(() => {
+      // this.$confirm("用户退出后所有数据将重置?", "系统提示", {
+      //   confirmButtonText: "确定",
+      //   cancelButtonText: "取消"
+      // })
+      //   .then(() => {
           this.logout();
-        })
-        .catch(() => {});
+        // })
+        // .catch(() => {});
     },
 
     ...mapActions(["logout"])

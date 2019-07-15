@@ -110,7 +110,6 @@ import {
   getCityJurors,
   getUndertakers
 } from "../../http/api/juror-manage";
-import { getUserList } from "../../http/api/user";
 
 import { CaseUtil } from "./config";
 

@@ -19,7 +19,6 @@ export default {
     onChange(e) {
       console.log(e);
       this.readExcel(e);
-      saveAs();
     },
 
     readExcel(e) {

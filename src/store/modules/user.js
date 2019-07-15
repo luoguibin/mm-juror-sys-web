@@ -92,10 +92,11 @@ export default {
             logoutAccount().finally(() => {
                 localStorage.removeItem("mm-juror-userinfo");
                 sessionStorage.clear();
+                sessionStorage.setItem("mm-juror-sys-mock-data", JSON.stringify(window.apiData))
                 context.commit("setUserInfo");
                 context.commit("setUserMenu");
-                router.push({name: "login"})
-                // window.location.reload();
+                router.push({ name: "login" })
+                window.location.reload();
             });
         },
 
