@@ -522,8 +522,8 @@ apiData.saveLawCase = function (data) {
         obj.status = apiData.statuses[0].id;
         if (obj.jurors && obj.jurors.length) {
             obj.status++;
-            obj.jurors.forEach(jurorId => {
-                const juror = this.jurors.find(o => o.id === jurorId);
+            obj.jurors.forEach(o => {
+                const juror = this.jurors.find(o => o.id === o.id);
                 if (juror) {
                     juror.caseCount++;
                 }
