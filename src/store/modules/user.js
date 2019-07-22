@@ -1,5 +1,5 @@
 import { createAccount, loginByAccount, logoutAccount, getUserMenu } from "@/http/api/user";
-import router from "../../router";
+import router, { newDefaultRouter } from "../../router";
 import Error404 from "@/page/error404";
 import { Message } from "element-ui";
 
@@ -96,7 +96,7 @@ export default {
                 context.commit("setUserInfo");
                 context.commit("setUserMenu");
                 router.push({ name: "login" })
-                window.location.reload();
+                // window.location.reload();
             });
         },
 
@@ -130,6 +130,8 @@ export default {
                 }
             });
             newRouters.push({ path: "/*", redirect: "/home" });
+            // reset the router, so that the page does not need to be refreshed.
+            router.matcher = newDefaultRouter().matcher;
             router.addRoutes(newRouters)
 
             context.commit("setUserMenu", menu);

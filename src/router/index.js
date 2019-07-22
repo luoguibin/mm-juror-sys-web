@@ -6,20 +6,24 @@ import Login from "../page/login"
 
 Vue.use(Router)
 
-const router = new Router({
-  routes: [
-    {
-      path: "/error404",
-      name: "error404",
-      component: Error404
-    },
-    {
-      path: "/login",
-      name: "login",
-      component: Login
-    }
-  ]
-})
+export const newDefaultRouter = function () {
+  return new Router({
+    routes: [
+      {
+        path: "/error404",
+        name: "error404",
+        component: Error404
+      },
+      {
+        path: "/login",
+        name: "login",
+        component: Login
+      }
+    ]
+  })
+}
+
+const router = newDefaultRouter();
 
 router.beforeEach((to, from, next) => {
   // console.log("router.beforeEach:  " + from.fullPath + " --> " + to.fullPath);
