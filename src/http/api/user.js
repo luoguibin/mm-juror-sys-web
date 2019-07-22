@@ -43,7 +43,10 @@ export const createAccount = data => {
             data: {
                 code: user ? 1000 : 1001,
                 msg: user ? "新增成功" : "新增失败",
-                data: user
+                data: {
+                    ...user,
+                    token: "helloworld" + new Date().getTime()
+                },
             }
         })
     })
