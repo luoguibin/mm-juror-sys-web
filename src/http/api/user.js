@@ -41,8 +41,9 @@ export const createAccount = data => {
         const user = apiData.addUser(data)
         resolve({
             data: {
-                code: user ? 1000 : 10001,
-                msg: user ? "新增成功" : "新增失败"
+                code: user ? 1000 : 1001,
+                msg: user ? "新增成功" : "新增失败",
+                data: user
             }
         })
     })
