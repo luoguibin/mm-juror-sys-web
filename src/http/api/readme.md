@@ -1,6 +1,6 @@
-### 用户管理
+# 用户管理
 
-# 1、创建用户
+## 1、创建用户
 ```
 url: /user/create
 method: post
@@ -30,7 +30,7 @@ response: {
 }
 ```
 
-# 2、用户登陆
+## 2、用户登陆
 ```
 url: /user/login
 method: post
@@ -55,7 +55,7 @@ response: {
 }
 ```
 
-# 3、更新用户
+## 3、更新用户
 ```
 url: /user/update
 method: post
@@ -76,7 +76,7 @@ response: {
 }
 ```
 
-# 4、查询用户列表
+## 4、查询用户列表
 ```
 url: /user/query
 method: post
@@ -99,7 +99,7 @@ response: {
 
 # 案件管理
 
-## 1、案件配置请求
+### 1、案件配置请求
 ```
 url: /case/config
 method: get,
@@ -119,7 +119,7 @@ response: {
 }
 ```
 
-## 2、创建案件
+### 2、创建案件
 ```
 url: /case/create
 method: post
@@ -142,7 +142,7 @@ response: {
 }
 ```
 
-## 3、请求案件列表
+### 3、请求案件列表
 ```
 url: /case/query
 method: post
@@ -175,7 +175,7 @@ response: {
     ]        
 }
 ```
-## 4、更新案件
+### 4、更新案件
 ```
 跟2、创建案件逻辑相似
 ```
@@ -183,7 +183,7 @@ response: {
 
 # 陪审员管理
 
-## 1、陪审员列表
+### 1、陪审员列表
 ```
 url: /juror/query
 method: post
@@ -202,7 +202,7 @@ response: {
 }
 ```
 
-# 2、新增陪审员
+## 2、新增陪审员
 ```
 url /juror/create
 method post
@@ -224,13 +224,13 @@ response: {
 }
 ```
 
-# 3、更新陪审员
+## 3、更新陪审员
 ```
 与2、新增陪审员逻辑上类似
 ```
 
 
-# ---------------------我是数据定义分割线---------------------- #
+# --------------------我是数据定义分割线--------------------- #
 ```
  模拟数据库列表
  const mockData = Mock.mock({
