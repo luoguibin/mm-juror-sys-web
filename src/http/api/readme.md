@@ -1,20 +1,32 @@
 ### 用户管理
+
 # 1、创建用户
 ```
 url: /user/create
 method: post
+
 data: {
-    id: 15688888888,        // 必传
-    pw: "123456",           // 必传，暂时为明文密码
-    name: "super_admin",    // 必传，昵称
-    authType: 9,            // 用户权限 0~9，默认1
-    jurorId: 0,             // 陪审员id，默认0
-    timeCreate: ''          // 系统创建创建时间
+    id: 15688888888,            // 必传，手机号码
+    pw: "123456",               // 必传，暂时为明文密码
+    name: "super_admin",        // 必传，昵称
+    authType: 9,                // 用户权限 1~9，普通用户1，管理员5，超级管理员9；
+                                // 注册不得越权，比如管理员只能提升普通用户的权限到5
+    jurorId: 0,                 // 陪审员id，默认0，用于关联陪审员信息
+    timeCreate: ''              // 系统创建创建时间
 }
-returns: {
-    code: 200,      // 状态码
-    msg: "",        // 返回信息
-    data: {}        // 请求结果
+
+response: {
+    code: 1000,                 // 状态码：1000请求成功，1001请求失败，1002，1003等自定义
+    msg: "注册成功",             // 返回信息
+    data: {                     // 请求结果，用于注册后直接登录
+        id: 15688888888,        // 必传
+        pw: "123456",           // 必传
+        name: "super_admin",    // 必传
+        authType: 9,            // 必传
+        token: '',              // 必传
+        jurorId: 0,                 
+        timeCreate: ''              
+    }                    
 }
 ```
 
@@ -22,76 +34,131 @@ returns: {
 ```
 url: /user/login
 method: post
+
 data: {
-    id: 15688888888,        // 必传
-    pw: "123456",           // 必传，暂时为明文密码
+    id: 15688888888,            // 必传
+    pw: "123456",               // 必传，暂时为明文密码
 }
-returns: {
-    code: 200,      // 状态码
-    msg: "",        // 返回信息
+
+response: {
+    code: 1000,                 // 状态码
+    msg: "登录成功",             // 返回信息
     data: {
         id: 15688888888,        // 必传
-        pw: "123456",           // 必传，暂时为明文密码
-        name: "super_admin",    // 昵称
-        authType: 9,            // 必传，用户权限 0~9，默认1
-        jurorId: 0,             // 陪审员id，默认0
-        timeCreate: ''          // 系统创建创建时间
-        token: ''               // 必传，token
+        pw: "123456",           // 必传
+        name: "super_admin",    // 必传
+        authType: 9,            // 必传
+        token: '',              // 必传
+        jurorId: 0,                 
+        timeCreate: ''
     }
 }
 ```
+
 # 3、更新用户
 ```
-url: /user/create
+url: /user/update
 method: post
+
 data: {
-    id: 15688888888,        // 必传
-    pw: "123456",           // 必传，暂时为明文密码
-    name: "super_admin",    // 必传，昵称
-    authType: 9,            // 用户权限 0~9，默认1
-    jurorId: 0,             // 陪审员id，默认0
-    timeUpdate: ''          // 系统更新时间
+    token: "",                  // 必传，解析出当前登录的用户id
+    id: 15688888888,            // 必传，修改目标信息的用户id
+    pw: "123456",               
+    name: "admin",              
+    authType: 5,                
+    jurorId: 0,                 
 }
-returns: {
-    code: 200,      // 状态码
-    msg: "",        // 返回信息
-    data: {}        // 请求结果
+
+response: {
+    code: 1000,                 // 状态码
+    msg: "更新成功",             // 返回信息
+    data: {}                    // 请求结果
+}
+```
+
+# 4、查询用户列表
+```
+url: /user/query
+method: post
+
+data: {
+    token: "",                  // 必传，解析出当前登录的用户id
+    id: 15688888888,            // 如果存在id，则查询对应id的用户
+    authType: 5,                // 查询的权限不得高于token对应的权限
+    page: 1,                    // 查询当前页
+    limit: 10,                  // 每页个数
+}
+
+response: {
+    code: 1000,                 // 状态码
+    msg: "查询成功",             // 返回信息
+    data: []                    // 请求结果
 }
 ```
 
 
 # 案件管理
+
 ## 1、案件配置请求
 ```
 url: /case/config
 method: get,
-returns: {
-    code: 200,      // 状态码
-    msg: "",        // 返回信息
+
+params: {}
+
+response: {
+    code: 1000,                 // 状态码
+    msg: "",                    // 返回信息
     data: {
-        cities: [],         // 参见底部数据定义
-        servantUnits: [],   // 参见底部数据定义
-        caseTypes: [],      // 参见底部数据定义
-        statuses: [],       // 参见底部数据定义
-        caseProvinces: []   // 参见底部数据定义
+        cities: [],             // 参见底部数据定义
+        servantUnits: [],       // 参见底部数据定义
+        caseTypes: [],          // 参见底部数据定义
+        statuses: [],           // 参见底部数据定义
+        caseProvinces: []       // 参见底部数据定义
     }
 }
 ```
 
-## 2、请求案件列表
+## 2、创建案件
 ```
-url: /case/list
+url: /case/create
 method: post
+
 data: {
-    id: 15688888888,        // 可选，案件id
-    page: 1,                // 可选，请求当前页
-    limit: 10,              // 可选，一页的数据个数
-    status: 0,              // 可选，-1, 0, 1分别为所有，未分配，已分配
+    token: "",                      // 必传，
+    caseYear: 2019,                 // 必传，案件年号
+    caseProvince: 440000,           // 必传，单位编号，参见底部数据caseProvinces定义
+    caseType: 1001,                 // 必传，案件类型id，参见底部数据caseTypes定义
+    caseCode: 1234,                 // 必传，案件编号
+    servantUnitId: 102000001,       // 必传，承办机构id
+    undertakerId: 10001000,         // 必传，承办人id
+    jurors: []                      // 陪审员列表
 }
-returns: {
-    code: 200,      // 状态码
-    msg: "",        // 返回信息
-    data: [         // 请求结果
+
+response: {
+    code: 1000,                     // 状态码
+    msg: "添加成功",                // 返回信息
+    data: {}
+}
+```
+
+## 3、请求案件列表
+```
+url: /case/query
+method: post
+
+data: {
+    token: "",                  // 必传，解析出登录的用户id，提取对应的案件列表
+    id: 15688888888,            // 可选，案件id
+    page: 1,                    // 可选，请求当前页
+    limit: 10,                  // 可选，一页的数据个数
+    status: 0,                  // 可选，0为所有，其余数值参见底部数据statuses定义
+}
+
+response: {
+    code: 1000,                 // 状态码
+    msg: "",                    // 返回信息
+    data: [                     // 请求结果
        {
            id: 0,               // 案件id
            caseYear: 2019,      // 案件年号
@@ -108,46 +175,64 @@ returns: {
     ]        
 }
 ```
+## 4、更新案件
+```
+跟2、创建案件逻辑相似
+```
 
-# 2、增删改
 
 # 陪审员管理
+
 ## 1、陪审员列表
 ```
-url: /case/list
+url: /juror/query
 method: post
+
 data: {
-    id: 15688888888,        // 可选，陪审员id
-    page: 1,                // 可选，请求当前页
-    limit: 10,              // 可选，一页的数据个数
-    status: 0,              // 可选，-1, 0, 1分别为所有，未分配，已分配
-    orderType: 1,           // 可选，案件数排序方式
+    id: 15688888888,            // 可选，陪审员id
+    page: 1,                    // 可选，请求当前页
+    limit: 10,                  // 可选，一页的数据个数
+    orderType: 1,               // 可选，案件数排序方式
 }
-returns: {
-    code: 200,      // 状态码
-    msg: "",        // 返回信息
-    data: [         // 请求结果
-       {
-            id: 10001000,          
-            name: "",               
-            sex: 0,
-            phone: 15600000001,
-            servantUnitId: 10,
-            jurorType: 0,
-            address: "",
-            caseCount: 0,
-            timeCreate: ''
-       }
-    ]        
+
+response: {
+    code: 1000,                 // 状态码
+    msg: "",                    // 返回信息
+    data: []                    // 陪审员列表
 }
 ```
 
-# 2、增删改
+# 2、新增陪审员
+```
+url /juror/create
+method post
 
+data: {
+    token: "",                  // 必传
+    jurorType: 0,               // 必传，1为承办人，0为陪审员
+    servantUnitId: 102000001,   // 必传，承办机构id
+    name: "dfgdf",              // 必传，原则上真实姓名
+    phone: 15622222222,         // 必传，手机号码
+    sex: 1,                     // 1为男，0为女
+    address:"gfhdf"             // 住址
+}
+
+response: {
+    code: 1000,                 // 状态码
+    msg: "",                    // 返回信息
+    data: {}
+}
+```
+
+# 3、更新陪审员
+```
+与2、新增陪审员逻辑上类似
+```
 
 
 # ---------------------我是数据定义分割线---------------------- #
 ```
+ 模拟数据库列表
  const mockData = Mock.mock({
      "users": [{
          "id": 15610001000,             // id，手机号为账号
@@ -339,3 +424,6 @@ statuses: [
     // { id: 103, name: "已完结" }
 ]
 ```
+
+
+
