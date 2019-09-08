@@ -77,9 +77,9 @@ response: {
 ## 4、查询用户列表
 ```
 url: /user/query
-method: post
+method: get
 
-data: {
+params: {
     token: "",                  // 必传，解析出当前登录的用户id
     id: 15688888888,            // 如果存在id，则查询对应id的用户
     authType: 5,                // 查询的权限不得高于token对应的权限
@@ -242,7 +242,7 @@ url /case/untakers
 method get
 
 
-data: {
+params: {
     token: "",                  // 必传
     jurorType: 0,               // 必传，1为承办人，0为陪审员
     servantUnitId: 102000001,   // 必传，承办机构id
