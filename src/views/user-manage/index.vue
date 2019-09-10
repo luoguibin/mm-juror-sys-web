@@ -151,10 +151,14 @@ export default {
           }
         },
         {
-          prop: "timeCreate",
-          label: "创建时间",
+          prop: "last_login",
+          label: "最近登录",
           changeText(obj, key) {
-            return Vue.filter("time-filter")(obj[key]);
+            if (obj[key] === "None") {
+              return "-";
+            } else {
+              return obj[key];
+            }
           }
         },
         { prop: "table-option", label: "操作", slot: "table-option" }
@@ -196,7 +200,11 @@ export default {
         ...this.formData
       })
         .then(({ data }) => {
-          this.tableData = data.data;
+          const list = data.data || [];
+          list.forEach(o => {
+            o.authType = +o.authType;
+          });
+          this.tableData = list;
           this.tableTotal = data.total;
         })
         .finally(() => {

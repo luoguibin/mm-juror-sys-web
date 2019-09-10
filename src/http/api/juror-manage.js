@@ -1,6 +1,13 @@
 import apiData from "./data";
+import request from "../index";
 
 export const getJurors = params => {
+    console.log(JSON.stringify(params));
+    return request({
+        url: "/api/juror/query",
+        method: "get",
+        params
+    })
     return new Promise(function (resolve, reject) {
         const id = params.id;
         if (id) {
@@ -65,6 +72,12 @@ export const getJurors = params => {
 }
 
 export const getLowJurors = params => {
+    console.log(JSON.stringify(params));
+    return request({
+        url: "/api/juror/query-low",
+        method: "get",
+        params
+    })
     return new Promise(function (resolve, reject) {
         const result = apiData.getLowJurors(params),
             flag = result.length;
@@ -79,6 +92,12 @@ export const getLowJurors = params => {
 }
 
 export const getUndertakers = params => {
+    console.log(JSON.stringify(params));
+    return request({
+        url: "/api/juror/query-takers",
+        method: "get",
+        params
+    })
     return new Promise(function (resolve, reject) {
         resolve({
             data: {
@@ -94,6 +113,12 @@ export const getUndertakers = params => {
 }
 
 export const deleteJuror = params => {
+    console.log(JSON.stringify(params));
+    return request({
+        url: "/api/juror/delete",
+        method: "delete",
+        params
+    })
     return new Promise(function (resolve, reject) {
         const index = apiData.jurors.findIndex(o => o.id === params.id);
         if (index >= 0) {
@@ -109,6 +134,12 @@ export const deleteJuror = params => {
 }
 
 export const saveJuror = data => {
+    console.log(JSON.stringify(data));
+    return request({
+        url: "/api/juror/modify",
+        method: "post",
+        data
+    })
     return new Promise(function (resolve, reject) {
         const flag = apiData.saveJuror(data);
         resolve({
@@ -121,6 +152,12 @@ export const saveJuror = data => {
 }
 
 export const getCityJurors = params => {
+    console.log(JSON.stringify(params));
+    return request({
+        url: "/api/juror/query-city-jurors",
+        method: "get",
+        params
+    })
     return new Promise(function (resolve, reject) {
         const result = apiData.jurors.filter(o => {
             const prefix = ("" + o.servantUnitId).substring(0, 4);

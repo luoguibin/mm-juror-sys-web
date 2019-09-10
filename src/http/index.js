@@ -5,6 +5,7 @@ import { baseUrl } from "@/config";
 import { Message } from "element-ui";
 
 axios.defaults.timeout = 10000;
+// axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8'
 
 // 返回其他状态吗
 axios.defaults.validateStatus = function (status) {
@@ -18,10 +19,10 @@ axios.defaults.baseURL = baseUrl;
 //HTTPrequest拦截
 axios.interceptors.request.use(
     config => {
-        // if (config.data) {
-        //     config.data = Qs.stringify(config.data);
-        //     config.headers["Content-Type"] = "application/x-www-form-urlencoded";
-        // }
+        if (config.data) {
+            config.data = Qs.stringify(config.data);
+            config.headers["Content-Type"] = "application/x-www-form-urlencoded";
+        }
         const token = (config.params || {}).token === true;
 
         if (token) {

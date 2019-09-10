@@ -1,6 +1,13 @@
 import apiData from "./data";
+import request from "../index";
 
 export const getLawCases = params => {
+    console.log(JSON.stringify(params));
+    return request({
+        url: "/api/case/query",
+        method: "get",
+        params
+    })
     return new Promise(function (resolve, reject) {
         const id = params.id;
         if (id) {
@@ -59,6 +66,12 @@ export const getLawCases = params => {
 }
 
 export const getLawCasesByJurorId = params => {
+    console.log(JSON.stringify(params));
+    return request({
+        url: "/api/case/query-by-jurorid",
+        method: "get",
+        params
+    })
     return new Promise(function (resolve, reject) {
        
         let tempResults = apiData.lawCases.filter(o => {
@@ -112,6 +125,12 @@ export const getLawCasesByJurorId = params => {
 }
 
 export const getLawCase = params => {
+    return request({
+        url: "/api/case/query-one",
+        method: "get",
+        params
+    })
+    console.log(JSON.stringify(params));
     return new Promise(function (resolve, reject) {
         const lawCase = apiData.getLawCase(params);
         resolve({
@@ -125,6 +144,12 @@ export const getLawCase = params => {
 }
 
 export const deleteLawCase = params => {
+    console.log(JSON.stringify(params));
+    return request({
+        url: "/api/case/delete",
+        method: "delete",
+        params
+    })
     return new Promise(function (resolve, reject) {
         const index = apiData.lawCases.findIndex(o => o.id === params.id);
         if (index >= 0) {
@@ -148,6 +173,12 @@ export const deleteLawCase = params => {
 }
 
 export const saveLawCase = data => {
+    console.log(JSON.stringify(data));
+    return request({
+        url: "/api/case/modify",
+        method: "post",
+        data
+    })
     return new Promise(function (resolve, reject) {
         const flag = apiData.saveLawCase(data);
         resolve({
@@ -160,6 +191,11 @@ export const saveLawCase = data => {
 }
 
 export const getCaseConfig = () => {
+    console.log("getCaseConfig");
+    return request({
+        url: "/api/case/config",
+        method: "get"
+    })
     return new Promise(function (resolve, reject) {
         resolve({
             data: {

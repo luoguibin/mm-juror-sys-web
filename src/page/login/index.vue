@@ -43,6 +43,7 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
+import { apiTest } from "@/http/api/user";
 
 export default {
   name: "login",
@@ -95,6 +96,7 @@ export default {
   },
   created() {
     window.login = this;
+    this.apiTest = apiTest;
   },
   methods: {
     onSignUpChange() {
