@@ -18,17 +18,17 @@
 
       <!-- 操作按钮插槽 -->
       <template #table-option="{data}">
-        <el-button type="text" @click="onOpenDialog(data)">详情</el-button>
+        <el-button v-if="data.authType < authType" type="text" @click="onOpenDialog(data)">详情</el-button>
         <el-button
-          type="text"
           v-if="authType >= 5 && data.authType < authType"
+          type="text"
           @click="onDelete(data)"
         >删除</el-button>
       </template>
 
       <el-pagination
         slot="pagination"
-        layout="prev, pager, next"
+        layout="prev, pager, next, total, jumper"
         background
         hide-on-single-page
         :total="tableTotal"
@@ -53,7 +53,7 @@
         <el-form-item v-if="false && isEditData" label="重复密码" prop="pw2">
           <el-input v-model="editData.pw2" show-password clearable></el-input>
         </el-form-item>
-        <el-form-item label="权 限" prop="authType" v-if="authType >= 5">
+        <el-form-item label="权 限" prop="authType" v-if="authType >= 9">
           <el-select v-model="editData.authType">
             <el-option label="普通用户" :value="1"></el-option>
             <el-option label="管理员" :value="5"></el-option>
@@ -111,10 +111,10 @@ export default {
           prop: "authType",
           label: "账号类型",
           target: "select",
+          disabled: true,
           options: [
             { value: 0, label: "全部" },
-            { value: 1, label: "普通用户" },
-            { value: 5, label: "管理员" }
+            { value: 1, label: "普通用户" }
           ]
         }
       ],
@@ -146,7 +146,7 @@ export default {
             } else if (authType === 9) {
               return "超级管理员";
             } else {
-              return "未知";
+              return "--";
             }
           }
         },
@@ -179,9 +179,14 @@ export default {
 
   created() {
     window.userManage = this;
-    if (this.authType >= 9) {
+    if (this.authType >= 5) {
       const authTypeProp = this.formProps.find(o => o.prop === "authType");
-      authTypeProp.options.push({ value: 9, label: "超级管理员" });
+      authTypeProp.disabled = false;
+
+      authTypeProp.options.push({ value: 5, label: "管理员" });
+      if (this.authType >= 9) {
+        authTypeProp.options.push({ value: 9, label: "超级管理员" });
+      }
     }
     this.getUserList();
   },
@@ -278,5 +283,10 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss" scoped>
+.user-manage {
+  .el-pagination {
+    margin-top: 20px;
+  }
+}
 </style>

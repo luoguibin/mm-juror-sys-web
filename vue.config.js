@@ -8,7 +8,7 @@ module.exports = {
   publicPath: './',
   outputDir: 'dist',
 
-  lintOnSave: true,
+  lintOnSave: false,
 
   chainWebpack: config => {
     config
