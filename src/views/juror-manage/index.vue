@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import Vue from "vue";
+// import Vue from "vuevue";
 import { mapGetters } from "vuex";
 import FormTable from "../../components/form-table";
 import {
@@ -65,10 +65,10 @@ export default {
     return {
       formProps: [
         {
-          prop: "id",
-          label: "ID",
+          prop: "phone",
+          label: "Phone",
           target: "number",
-          placeholder: "请输入ID",
+          placeholder: "请输入phone",
           disabled: false
         },
         {
@@ -76,7 +76,7 @@ export default {
           label: "案件数排序",
           target: "select",
           options: [
-            { value: 0, label: "所有" },
+            { value: 0, label: "默认" },
             { value: 1, label: "从多到少" },
             { value: 2, label: "从少到多" }
           ],
@@ -97,14 +97,14 @@ export default {
           }
         },
         {
-          prop: "servantUnit",
+          prop: "dept_id",
           label: "工作单位",
           changeText(obj, key) {
-            return obj[key].name;
+            return obj[key].name || "-";
           }
         },
         {
-          prop: "caseCount",
+          prop: "case_count",
           label: "已陪审案件数",
           target: "button",
           buttonType: "text",
@@ -112,13 +112,13 @@ export default {
         },
         { prop: "phone", label: "手机号码" },
         { prop: "address", label: "地址" },
-        {
-          prop: "timeCreate",
-          label: "创建时间",
-          changeText(obj, key) {
-            return Vue.filter("time-filter")(obj[key]);
-          }
-        },
+        // {
+        //   prop: "timeCreate",
+        //   label: "创建时间",
+        //   changeText(obj, key) {
+        //     return Vue.filter("time-filter")(obj[key]);
+        //   }
+        // },
         { prop: "table-option", label: "操作", slot: "table-option" }
       ],
       tableData: [],
@@ -198,13 +198,12 @@ export default {
     },
 
     handleConfirm(data) {
-      console.log(data);
       this.getJurors();
     },
 
     getJurors() {
       this.tableLoading = true;
-      getJurors({ page: this.currentPage, ...this.formData })
+      getJurors({ page: this.currentPage, ...this.formData, token: true })
         .then(({ data }) => {
           this.tableData = data.data;
           this.tableTotal = data.total;

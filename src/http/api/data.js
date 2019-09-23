@@ -188,7 +188,7 @@ if (!apiData) {
     // @csentence(100, 500)
 
     // const mockData = Mock.mock({
-    //     "users|2-5": [{
+    //     "users|10": [{
     //         "id|+1": 15610001000,
     //         "pw": "123456",
     //         "name": "@cname",
@@ -196,7 +196,7 @@ if (!apiData) {
     //         "jurorId": 0,
     //         "timeCreate": apiData.currentTime
     //     }],
-    //     "jurors|5": [{
+    //     "jurors|10": [{
     //         "id|+1": 10001000,
     //         "name": "@cname",
     //         "sex|1": [0, 1],
@@ -207,7 +207,7 @@ if (!apiData) {
     //         "caseCount": 0,
     //         "timeCreate": apiData.currentTime
     //     }],
-    //     "lawCases|3": [{
+    //     "lawCases|30": [{
     //         "id|+1": 20001000,
     //         "caseYear|1": [2018, 2019],
     //         "caseProvince|1": apiData.caseProvinceIds,
