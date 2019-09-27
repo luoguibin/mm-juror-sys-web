@@ -1,1 +1,1 @@
-export const baseUrl = "http://49.235.91.138" || process.env.VUE_APP_API_BASE_URL;
+export const baseUrl = "http://japi.sghen.cn" || process.env.VUE_APP_API_BASE_URL;
