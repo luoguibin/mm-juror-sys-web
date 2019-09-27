@@ -45,7 +45,6 @@
 </template>
 
 <script>
-// import Vue from "vuevue";
 import { mapGetters } from "vuex";
 import FormTable from "../../components/form-table";
 import {
@@ -93,15 +92,12 @@ export default {
           prop: "sex",
           label: "性别",
           changeText(obj, key) {
-            return obj[key] ? "男" : "女";
+            return +obj[key] === 1 ? "男" : "女";
           }
         },
         {
           prop: "dept_id",
-          label: "工作单位",
-          changeText(obj, key) {
-            return obj[key].name || "-";
-          }
+          label: "工作单位"
         },
         {
           prop: "case_count",
@@ -112,13 +108,6 @@ export default {
         },
         { prop: "phone", label: "手机号码" },
         { prop: "address", label: "地址" },
-        // {
-        //   prop: "timeCreate",
-        //   label: "创建时间",
-        //   changeText(obj, key) {
-        //     return Vue.filter("time-filter")(obj[key]);
-        //   }
-        // },
         { prop: "table-option", label: "操作", slot: "table-option" }
       ],
       tableData: [],
@@ -139,6 +128,7 @@ export default {
           options: [],
           call: (obj, option) => {
             // servantUnitId
+            console.log(obj, option)
           }
         },
         {
@@ -203,7 +193,7 @@ export default {
 
     getJurors() {
       this.tableLoading = true;
-      getJurors({ page: this.currentPage, ...this.formData, token: true })
+      getJurors({ token: true, page: this.currentPage, ...this.formData })
         .then(({ data }) => {
           this.tableData = data.data;
           this.tableTotal = data.total;

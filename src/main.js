@@ -1,27 +1,14 @@
 import Vue from "vue";
 
-import ElementUI from "element-ui";
-import "./style/theme-chalk/index.css";
-
-Vue.use(ElementUI);
-
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import { mapActions } from "vuex";
 
-import "./style/main.scss";
-import "./mock";
+import "./common/element-ui";
+import "./style/public.scss";
 
 Vue.config.productionTip = false
-import moment from "moment";
-Vue.filter("time-filter", function (value) {
-  if (typeof value === "number") {
-    return moment(value).format("YYYY-MM-DD  HH:mm:ss");
-  } else {
-    return value
-  }
-})
 
 new Vue({
   created() {

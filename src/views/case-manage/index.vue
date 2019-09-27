@@ -180,10 +180,7 @@ export default {
         { prop: "jurors", label: "陪审员", slot: "jurors" },
         {
           prop: "timeCreate",
-          label: "创建时间",
-          changeText(obj, key) {
-            return Vue.filter("time-filter")(obj[key]);
-          }
+          label: "创建时间"
         },
         { prop: "table-option", label: "操作", slot: "table-option" }
       ],

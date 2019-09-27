@@ -1,6 +1,4 @@
 import request from "../index";
-import QS from 'qs';
-import apiData from "./data";
 
 export const apiTest = (params, data) => 
     request({
@@ -11,33 +9,6 @@ export const apiTest = (params, data) =>
     })
 
 export const loginByAccount = data => {
-    console.log(JSON.stringify(data));
-    // return new Promise(function (resolve, reject) {
-    //     const user = apiData.users.find(o => {
-    //         return o.id === data.id;
-    //     })
-    //     console.log(user, data)
-    //     if (user && user.pw === data.pw) {
-    //         resolve({
-    //             data: {
-    //                 code: 1000,
-    //                 data: {
-    //                     ...user,
-    //                     token: "helloworld" + new Date().getTime()
-    //                 },
-    //                 msg: "登录成功"
-    //             }
-    //         })
-    //     } else {
-    //         resolve({
-    //             data: {
-    //                 code: 1001,
-    //                 msg: "账号或密码错误"
-    //             }
-    //         })
-    //     }
-    // })
-
     return request({
         url: "/api/user/login",
         method: "post",
@@ -49,20 +20,6 @@ export const loginByAccount = data => {
 }
 
 export const createAccount = data => {
-    console.log(JSON.stringify(data));
-    // return new Promise(function (resolve, reject) {
-    //     const user = apiData.addUser(data)
-    //     resolve({
-    //         data: {
-    //             code: user ? 1000 : 1001,
-    //             msg: user ? "新增成功" : "新增失败",
-    //             data: {
-    //                 ...user,
-    //                 token: "helloworld" + new Date().getTime()
-    //             },
-    //         }
-    //     })
-    // })
     return request({
         url: "/api/user/create",
         method: "post",
@@ -71,16 +28,6 @@ export const createAccount = data => {
 }
 
 export const updateAccount = data => {
-    console.log(JSON.stringify(data));
-    // return new Promise(function (resolve, reject) {
-    //     const flag = apiData.updateUser(data)
-    //     resolve({
-    //         data: {
-    //             code: flag ? 1000 : 10001,
-    //             msg: flag ? "更新成功" : "更新失败"
-    //         }
-    //     })
-    // })
     return request({
         url: "/api/user/modify",
         method: "post",
@@ -93,16 +40,6 @@ export const updateAccount = data => {
 
 
 export const deleteAccount = params => {
-    console.log(JSON.stringify(params));
-    // return new Promise(function (resolve, reject) {
-    //     const flag = apiData.deleteUser(params)
-    //     resolve({
-    //         data: {
-    //             code: flag ? 1000 : 10001,
-    //             msg: flag ? "删除成功" : "删除失败"
-    //         }
-    //     })
-    // })
     return request({
         url: "/api/user/delete",
         method: "delete",
@@ -120,7 +57,6 @@ export const logoutAccount = () => {
 }
 
 export const getUserMenu = ({ authType }) => {
-    console.log(authType);
     const menu = {
         routers: [
             {
@@ -169,51 +105,6 @@ export const getUserMenu = ({ authType }) => {
 }
 
 export const getUserList = params => {
-    console.log(JSON.stringify(params));
-    // return new Promise(function (resolve, reject) {
-    //     const id = params.id;
-    //     const authType = params.authType || 0;
-
-    //     if (id) {
-    //         let user = apiData.users.find(o => o.id === id);
-    //         if (user && (authType !== 0 && user.authType !== authType)) {
-    //             user = null;
-    //         }
-    //         resolve({
-    //             data: {
-    //                 data: user ? JSON.parse(JSON.stringify([user])) : [],
-    //                 total: user ? 1 : 0,
-    //                 code: user ? 1000 : 1001,
-    //                 msg: user ? "获取成功" : "获取失败"
-    //             }
-    //         })
-    //         return;
-    //     }
-    //     const page = params.page || 1;
-    //     const limit = params.limit || 10;
-    //     const start = (page - 1) * limit;
-    //     const mAuthType = params.mAuthType || 1;
-    //     const name = params.name;
-
-    //     let temp = apiData.users.filter(o => {
-    //         if (authType === 0) {
-    //             return o.authType <= mAuthType;
-    //         } else {
-    //             return o.authType === authType;
-    //         }
-    //     });
-    //     if (name && temp.length) {
-    //         temp = temp.filter(o => o.name.includes(name))
-    //     }
-    //     resolve({
-    //         data: {
-    //             data: JSON.parse(JSON.stringify(temp.slice(start, start + limit))),
-    //             total: temp.length,
-    //             code: 1000,
-    //             msg: "获取成功"
-    //         }
-    //     })
-    // })
     return request({
         url: "/api/user/query",
         method: "get",

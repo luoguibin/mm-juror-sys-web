@@ -1,7 +1,6 @@
 <template>
   <div class="user-manage">
-    <!-- <xml-test></xml-test> -->
-
+    
     <form-table
       :formProps="formProps"
       :formData="formData"
@@ -72,11 +71,14 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+
+    <el-dialog :visible.sync="importVisible" title="导入用户">
+      <xml-test></xml-test>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import Vue from "vue";
 import { mapGetters } from "vuex";
 import FormTable from "../../components/form-table";
 import {
@@ -173,7 +175,9 @@ export default {
       isEditData: false,
       inRequest: false,
       idDisabled: false,
-      editData: {}
+      editData: {},
+
+      importVisible: false
     };
   },
 
@@ -218,6 +222,7 @@ export default {
     },
 
     handleConfirm(data) {
+      console.log(data)
       this.currentPage = 1;
       this.getUserList();
     },

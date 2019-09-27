@@ -2,19 +2,19 @@ const path = require("path");
 const proxy = "http://localhost:8088"
 const argv = require("yargs").argv;
 
-process.env.VUE_APP_API_BASE_URL = argv.apiBaseUrl || ""; 
+process.env.VUE_APP_API_BASE_URL = argv.apiBaseUrl || "";
 
 module.exports = {
-  publicPath: './',
-  outputDir: 'dist',
+  publicPath: "./",
+  outputDir: "dist",
 
   lintOnSave: false,
 
   chainWebpack: config => {
     config
       .output
-      .filename('js/[name].js?[hash]')
-      .chunkFilename('js/[name].js?[hash]')
+      .filename("js/[name].js?[hash]")
+      .chunkFilename("js/[name].js?[hash]")
       .end();
 
     config.resolve.alias.set(
@@ -35,6 +35,8 @@ module.exports = {
     plugins.delete("prefetch")
     plugins.delete("preload")
 
+    // config.plugin("webpack-bundle-analyzer")
+    //   .use(require("webpack-bundle-analyzer").BundleAnalyzerPlugin)
   },
   configureWebpack: () => {
 
